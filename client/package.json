@@ -1,0 +1,33 @@
+{
+  "name": "template-bun",
+  "version": "1.0.1",
+  "author": "Phaser Studio <support@phaser.io> (https://phaser.io/)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phaserjs/template-bun.git"
+  },
+  "devDependencies": {
+    "terser": "^5.31.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
+  },
+  "bugs": {
+    "url": "https://github.com/phaserjs/template-bun/issues"
+  },
+  "description": "A Phaser 3 template using bun.",
+  "homepage": "https://github.com/phaserjs/template-bun#readme",
+  "license": "MIT",
+  "licenseUrl": "http://www.opensource.org/licenses/mit-license.php",
+  "scripts": {
+    "dev": "bun log.js dev && bunx --bun vite --config vite/config.dev.mjs",
+    "build": "bun log.js build && bunx --bun vite build --config vite/config.prod.mjs",
+    "dev-nolog": "bunx --bun vite --config vite/config.dev.mjs",
+    "build-nolog": "bunx --bun vite build --config vite/config.prod.mjs",
+    "schema": "bunx schema-codegen ../server/src/rooms/schema/GameState.ts --output ./src/schema/ --ts"
+  },
+  "dependencies": {
+    "colyseus.js": "^0.16.15",
+    "matter-js": "^0.20.0",
+    "phaser": "^4.0.0-rc.1"
+  }
+}
