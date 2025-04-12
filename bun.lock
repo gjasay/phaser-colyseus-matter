@@ -3,11 +3,9 @@
   "workspaces": {
     "": {
       "name": "phaser-colyseus-matter",
-      "dependencies": {
-        "concurrently": "^9.1.2",
-      },
       "devDependencies": {
         "@types/bun": "latest",
+        "concurrently": "^9.1.2",
       },
       "peerDependencies": {
         "typescript": "^5.0.0",

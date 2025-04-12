@@ -7,9 +7,9 @@
     "url": "git+https://github.com/phaserjs/template-bun.git"
   },
   "devDependencies": {
-    "terser": "^5.31.0",
-    "typescript": "^5.4.5",
-    "vite": "^5.2.11"
+    "terser": "^5.39.0",
+    "typescript": "^5.8.3",
+    "vite": "^5.4.18"
   },
   "bugs": {
     "url": "https://github.com/phaserjs/template-bun/issues"
@@ -19,10 +19,8 @@
   "license": "MIT",
   "licenseUrl": "http://www.opensource.org/licenses/mit-license.php",
   "scripts": {
-    "dev": "bun log.js dev && bunx --bun vite --config vite/config.dev.mjs",
-    "build": "bun log.js build && bunx --bun vite build --config vite/config.prod.mjs",
-    "dev-nolog": "bunx --bun vite --config vite/config.dev.mjs",
-    "build-nolog": "bunx --bun vite build --config vite/config.prod.mjs",
+    "dev": "bunx --bun vite --config vite/config.dev.mjs",
+    "build": "bunx --bun vite build --config vite/config.prod.mjs",
     "schema": "bunx schema-codegen ../server/src/rooms/schema/GameState.ts --output ./src/schema/ --ts"
   },
   "dependencies": {

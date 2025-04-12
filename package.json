@@ -3,12 +3,14 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "concurrently": "^9.1.2"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.8.3"
   },
   "scripts": {
+    "postinstall": "bun --cwd=server i && bun --cwd=client i",
     "start": "concurrently \"cd server; bun start;\" \"cd client; bun dev\" "
   }
 }
