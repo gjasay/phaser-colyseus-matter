@@ -13,7 +13,7 @@ interface IPhysicsConfig {
 }
 
 const physicsConfig: IPhysicsConfig = {
-  gravity: { x: 0, y: 0.1, scale: 0.01 },
+  gravity: { x: 0, y: 0, scale: 0 },
   velocityIterations: 1,
   positionIterations: 1,
   worldBounds: {
