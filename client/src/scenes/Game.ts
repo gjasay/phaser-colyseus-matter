@@ -8,6 +8,7 @@ import playerConfig from "../../../config/player.config";
 import { Rectangle } from "../schema/Rectangle";
 import { PlayerPrefab } from "../prefabs/Player";
 import physicsConfig from "../../../config/physics.config";
+import { Grid } from "../util/rendering/Grid";
 
 export class Game extends Scene {
   public inputHandler: InputHandler;
@@ -16,6 +17,8 @@ export class Game extends Scene {
   private _clientPlayerBody: PlayerPrefab;
   private _syncedPlayers: Phaser.GameObjects.Rectangle[] = [];
   private _entities: Phaser.GameObjects.Rectangle[] = [];
+
+  private _grid: Grid;
 
   constructor() {
     super("Game");
@@ -28,9 +31,22 @@ export class Game extends Scene {
     this.load.image("logo", "logo.png");
     this.load.image("red", "red_cube.png");
     this.load.image("green", "green_cube.png");
+    this.load.image("walls", "tiles/wall.png");
   }
 
   async create() {
+    this._grid = new Grid(this, 1024, 768);
+    // this._grid.placeWall(0, 0);
+    // this._grid.placeWall(1, 0);
+
+    this.input.on('pointermove', (e: Phaser.Input.Pointer) => {
+      if(e.middleButtonDown()) {
+        this._grid.removeWall(Math.floor(e.worldX / 32), Math.floor(e.worldY / 32));
+      }
+      else if(e.isDown) {
+        this._grid.placeWall(Math.floor(e.worldX / 32), Math.floor(e.worldY / 32));
+      }
+    })
     nm.instance.initialize();
     await nm.instance.connectToRoom("find");
 
