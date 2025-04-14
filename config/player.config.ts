@@ -1,4 +1,5 @@
 interface IPlayerConfig {
+  radius: number;
   walkSpeed: number;
   jumpForce: number;
   airTime: number;
@@ -9,6 +10,7 @@ interface IPlayerConfig {
 }
 
 const playerConfig: IPlayerConfig = {
+  radius: 25,
   walkSpeed: 0.00001,
   jumpForce: 0.000025,
   airTime: 100,

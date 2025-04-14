@@ -8,5 +8,6 @@
 export interface IInputMessage {
     left: boolean;
     right: boolean;
-    jump: boolean;
+    up: boolean;
+    down: boolean;
 }

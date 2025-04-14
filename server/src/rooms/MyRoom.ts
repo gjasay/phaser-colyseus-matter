@@ -99,15 +99,14 @@ export class MyRoom extends Room<State> {
   onJoin(client: Client, _options: any) {
     console.log(client.sessionId, "joined!");
     // Add the player to the state
-    this.state.players.set(client.sessionId, new Player(100, 100, 50, 50));
+    this.state.players.set(client.sessionId, new Player(100, 100, playerConfig.radius));
     const player = this.state.players.get(client.sessionId);
 
     // Initialize the player physics body
-    player.body = Bodies.rectangle(
+    player.body = Bodies.circle(
       player.x,
       player.y,
-      player.width,
-      player.height,
+      player.radius
     );
     player.body.mass = playerConfig.mass;
     player.body.friction = playerConfig.friction;

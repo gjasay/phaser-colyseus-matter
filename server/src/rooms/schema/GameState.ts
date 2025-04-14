@@ -1,6 +1,5 @@
 import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
 import { IInputMessage } from "../../../../types";
-import { Delayed } from "colyseus";
 
 export class Entity extends Schema {
   @type("number") x: number = 0;
@@ -25,14 +24,19 @@ export class Rectangle extends Entity {
   }
 }
 
-export class Player extends Rectangle {
-  inputQueue: IInputMessage[] = [];
-  jumping: boolean = false;
-  canJump: boolean = true;
-  jumpTimeout: Delayed;
+export class Circle extends Entity {
+  @type("number") radius: number = 0;
+  constructor(x: number = 0, y: number = 0, radius: number = 0) {
+    super(x, y);
+    this.radius = radius;
+  }
+}
 
-  constructor(x: number = 0, y: number = 0, width: number = 0, height: number = 0) {
-    super(x, y, width, height);
+export class Player extends Circle {
+  inputQueue: IInputMessage[] = [];
+
+  constructor(x: number = 0, y: number = 0, radius: number = 0) {
+    super(x, y, radius);
   }
 }
 

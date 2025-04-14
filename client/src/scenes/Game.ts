@@ -4,18 +4,15 @@ import { InputHandler } from "../util/InputHandler";
 import { Player } from "../schema/Player";
 import { CollectionCallback } from "@colyseus/schema";
 import gameConfig from "../../../config/game.config";
-import playerConfig from "../../../config/player.config";
 import { Rectangle } from "../schema/Rectangle";
 import { PlayerPrefab } from "../prefabs/Player";
-import physicsConfig from "../../../config/physics.config";
 import { Grid } from "../util/rendering/Grid";
 
 export class Game extends Scene {
   public inputHandler: InputHandler;
   private _accumulator: number = 0;
-  private _clientPlayer: Phaser.GameObjects.Rectangle;
-  private _clientPlayerBody: PlayerPrefab;
-  private _syncedPlayers: Phaser.GameObjects.Rectangle[] = [];
+  private _clientPlayer: PlayerPrefab;
+  private _syncedPlayers: Phaser.GameObjects.Arc[] = [];
   private _entities: Phaser.GameObjects.Rectangle[] = [];
 
   private _grid: Grid;
@@ -37,7 +34,7 @@ export class Game extends Scene {
   async create() {
     this._grid = new Grid(this, 1024, 768);
     // this._grid.placeWall(0, 0);
-    // this._grid.placeWall(1, 0);
+    // this._grid.placeWall(2, 0);
 
     this.input.on('pointermove', (e: Phaser.Input.Pointer) => {
       if(e.middleButtonDown()) {
@@ -89,27 +86,25 @@ export class Game extends Scene {
     players.onAdd((player: Player, sessionId: string) => {
       console.log("Player added:", player);
       if (sessionId === nm.instance.room.sessionId) {
-        this._clientPlayerBody = new PlayerPrefab(
+        this._clientPlayer = new PlayerPrefab(
           this,
           player.x,
           player.y,
           "green",
         );
-        this._clientPlayerBody.createServerRef(
+        this._clientPlayer.createServerRef(
           player.x,
           player.y,
-          player.width,
-          player.height,
+          player.radius
         );
-        nm.instance.schema(player).bindTo(this._clientPlayerBody.serverState);
-        nm.instance.schema(player).bindTo(this._clientPlayerBody.serverRef);
+        nm.instance.schema(player).bindTo(this._clientPlayer.serverState);
+        nm.instance.schema(player).bindTo(this._clientPlayer.serverRef);
       } else {
         this._syncedPlayers.push(
-          this.add.rectangle(
+          this.add.circle(
             player.x,
             player.y,
-            player.width,
-            player.height,
+            player.radius,
             0x00ff00,
           ),
         );
@@ -145,8 +140,8 @@ export class Game extends Scene {
   }
 
   fixedUpdate(time: number, dt: number) {
-    if (!this.inputHandler?.payload || !this._clientPlayerBody) return;
-    this._clientPlayerBody.fixedUpdate(dt);
+    if (!this.inputHandler?.payload || !this._clientPlayer) return;
+    this._clientPlayer.fixedUpdate(dt);
     this.matter.world.update(time, dt);
     this.inputHandler.sync();
   }

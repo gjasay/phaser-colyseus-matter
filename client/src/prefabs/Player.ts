@@ -8,14 +8,14 @@ interface IPlayerState {
   height: number;
 }
 
-export class PlayerPrefab extends Phaser.Physics.Matter.Image {
+export class PlayerPrefab extends Phaser.Physics.Matter.Sprite {
   public serverState: IPlayerState = {
     x: 0,
     y: 0,
     width: 0,
     height: 0,
   };
-  public serverRef: Phaser.GameObjects.Rectangle;
+  public serverRef: Phaser.GameObjects.Arc;
   private _scene: Game | Phaser.Scene;
 
   constructor(
@@ -27,11 +27,16 @@ export class PlayerPrefab extends Phaser.Physics.Matter.Image {
   ) {
     super(scene.matter.world, x, y, texture, frame);
     this._scene = scene;
-    this.setScale(0.75);
     this.setMass(playerConfig.mass);
     this.setFriction(playerConfig.friction);
     this.setFrictionAir(playerConfig.frictionAir);
 
+    this.setBody("circle", {
+      circleRadius: playerConfig.radius,
+      mass: playerConfig.mass,
+      friction: playerConfig.friction,
+      frictionAir: playerConfig.frictionAir,
+    });
     scene.add.existing(this);
   }
 
@@ -52,12 +57,11 @@ export class PlayerPrefab extends Phaser.Physics.Matter.Image {
     }
   }
 
-  public createServerRef(x: number, y: number, width: number, height: number) {
-    this.serverRef = this._scene.add.rectangle(
+  public createServerRef(x: number, y: number, radius: number) {
+    this.serverRef = this._scene.add.circle(
       x,
       y,
-      width,
-      height,
+      radius,
       0x000000,
       0.5,
     );
