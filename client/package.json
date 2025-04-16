@@ -24,6 +24,7 @@
     "schema": "bunx schema-codegen ../server/src/rooms/schema/GameState.ts --output ./src/schema/ --ts"
   },
   "dependencies": {
+    "@types/matter-js": "^0.19.8",
     "colyseus.js": "^0.16.15",
     "matter-js": "^0.20.0",
     "phaser": "^4.0.0-rc.1"

@@ -14,6 +14,7 @@ const config: Types.Core.GameConfig = {
     mode: Scale.FIT,
     autoCenter: Scale.CENTER_BOTH,
   },
+  pixelArt: true,
   physics: {
     default: "matter",
     matter: {
