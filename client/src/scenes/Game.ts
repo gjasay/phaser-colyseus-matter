@@ -114,25 +114,30 @@ export class Game extends Scene {
         nm.instance.schema(player).bindTo(this._clientPlayer.serverState);
         nm.instance.schema(player).bindTo(this._clientPlayer.serverRef);
         nm.instance.schema(player).onChange(() => {
-          this._clientPlayer.syncedPosition = {
+          const {x: nx, y: ny} = player;
+          const {x: ox, y: oy} = this._clientPlayer;
+          const dx = nx - ox;
+          const dy = ny - oy;
+          const distance = Math.sqrt((dx * dx) + (dy * dy));
+          if(distance < 30) {
+            return;
+          }
+          this._clientPlayer.syncedPosition.hasValue = true;
+          this.tweens.add({
+            targets: this._clientPlayer.syncedPosition,
             x: player.x,
-            y: player.y
-          };
-          // this.tweens.add({
-          //   targets: this._clientPlayer.physBody.position,
-          //   x: player.x,
-          //   y: player.y,
-          //   duration: 100,
-          //   ease: "Linear",
-          //   onComplete: () => {
-          //     this.tweens.add({
-          //       targets: this._clientPlayer,
-          //       alpha: 1,
-          //       duration: 500,
-          //       ease: "Linear"
-          //     })
-          //   }
-          // })
+            y: player.y,
+            duration: 100,
+            ease: "Linear",
+            onComplete: () => {
+              this.tweens.add({
+                targets: this._clientPlayer.syncedPosition,
+                alpha: 1,
+                duration: 500,
+                ease: "Linear"
+              })
+            }
+          })
         })
       } else {
         this._syncedActors.push(
@@ -143,26 +148,24 @@ export class Game extends Scene {
           )
         );
         nm.instance.schema(player).onChange(() => {
-
           const syncedPlayer =
             this._syncedActors[this._syncedActors.length - 1];
-            syncedPlayer.physBody.position.x = player.x;
-            syncedPlayer.physBody.position.y = player.y;
-          // this.tweens.add({
-          //   targets: syncedPlayer.physBody,
-          //   x: player.x,
-          //   y: player.y,
-          //   duration: 100,
-          //   ease: "Power1",
-          //   onComplete: () => {
-          //     this.tweens.add({
-          //       targets: syncedPlayer,
-          //       alpha: 1,
-          //       duration: 500,
-          //       ease: "Power1",
-          //     });
-          //   },
-          // });
+          syncedPlayer.syncedPos.hasValue = true;
+          this.tweens.add({
+            targets: syncedPlayer.syncedPos,
+            x: player.x,
+            y: player.y,
+            duration: 100,
+            ease: "Power1",
+            onComplete: () => {
+              this.tweens.add({
+                targets: syncedPlayer.syncedPos,
+                alpha: 1,
+                duration: 500,
+                ease: "Power1",
+              });
+            },
+          });
         });
       }
     });

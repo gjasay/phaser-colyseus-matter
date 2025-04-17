@@ -1,7 +1,7 @@
-import Matter, { Bodies, Body, Collision, Composite, Engine } from "matter-js";
+import { Bodies, Body, Collision, Composite, Engine, Vector } from "matter-js";
 import playerConfig from "../../../config/player.config";
 import { Game } from "../scenes/Game";
-import { Vector } from "matter";
+import { OptionalVector } from "./ServerActor";
 
 interface IPlayerState {
   x: number;
@@ -21,7 +21,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   private _engine: Engine;
   public physBody: Body;
 
-  public syncedPosition?: Vector;
+  public syncedPosition: OptionalVector = {...Vector.create(0, 0), hasValue: false};
 
   constructor(
     scene: Game | Phaser.Scene,
@@ -42,8 +42,9 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
 
   public fixedUpdate(_dt: number) {
 
-    if(this.syncedPosition) {
+    if(this.syncedPosition.hasValue) {
       Body.setPosition(this.physBody, this.syncedPosition);
+      this.syncedPosition.hasValue = false;
     }
     const scene = this.scene as Game;
     const { up, down, left, right } = scene.inputHandler.payload;
@@ -78,7 +79,11 @@ export function CreatePlayerBody(x: number, y: number): Body {
       mass: playerConfig.mass,
       friction: playerConfig.friction,
       frictionAir: playerConfig.frictionAir,
-      inertia: Infinity
+      inertia: Infinity,
+      collisionFilter: {
+        category: 0b0001,
+        mask: 0b1110
+      }
     }
   )
 }

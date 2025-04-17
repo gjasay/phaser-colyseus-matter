@@ -88,8 +88,6 @@ export class MyRoom extends Room<State> {
             y: playerConfig.walkSpeed
           });
         }
-
-
       }
       player.x = player.body.position.x;
       player.y = player.body.position.y;
@@ -106,7 +104,12 @@ export class MyRoom extends Room<State> {
     player.body = Bodies.circle(
       player.x,
       player.y,
-      playerConfig.radius
+      playerConfig.radius, {
+        collisionFilter: {
+          category: 0b0001,
+          mask: 0b1110
+        }
+      }
     );
     player.body.mass = playerConfig.mass;
     player.body.friction = playerConfig.friction;
