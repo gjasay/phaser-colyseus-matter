@@ -1,9 +1,9 @@
 interface IGameConfig {
-  fixedTimestep: number;
+  startingCoins: number;
 }
 
 const gameConfig: IGameConfig = {
-  fixedTimestep: 1000 / 60
+  startingCoins: 100,
 }
 
 export default gameConfig;

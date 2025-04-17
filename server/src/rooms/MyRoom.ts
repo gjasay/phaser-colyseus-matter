@@ -7,7 +7,6 @@ import {
   Composite,
 } from "matter-js";
 import { IInputMessage } from "../../../types";
-import gameConfig from "../../../config/game.config";
 import physicsConfig from "../../../config/physics.config";
 import playerConfig from "../../../config/player.config";
 
@@ -48,9 +47,9 @@ export class MyRoom extends Room<State> {
     this.setSimulationInterval((dt) => {
       elapsedTime += dt;
 
-      while (elapsedTime >= gameConfig.fixedTimestep) {
-        elapsedTime -= gameConfig.fixedTimestep;
-        this.fixedUpdate(gameConfig.fixedTimestep);
+      while (elapsedTime >= physicsConfig.fixedTimestep) {
+        elapsedTime -= physicsConfig.fixedTimestep;
+        this.fixedUpdate(physicsConfig.fixedTimestep);
       }
     });
 
