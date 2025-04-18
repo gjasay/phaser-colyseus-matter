@@ -1,0 +1,12 @@
+services:
+  balance:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: balance
+    env_file:
+      .env
+    ports:
+      - "2567:2567"
+      - "8080:8080"
+    restart: unless-stopped
