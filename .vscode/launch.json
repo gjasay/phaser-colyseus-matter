@@ -11,6 +11,13 @@
             "name": "Launch Firefox against localhost",
             "url": "http://localhost:8080",
             "webRoot": "${workspaceFolder}/client"
+        },
+        {
+            "type": "bun",
+            "request": "launch",
+            "program": "dev",
+            "name": "Server",
+            "cwd": "${workspaceFolder}/server"
         }
     ]
 }
