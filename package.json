@@ -11,6 +11,8 @@
   },
   "scripts": {
     "postinstall": "bun --cwd=server i && bun --cwd=client i",
-    "dev": "concurrently \"cd server; bun dev;\" \"cd client; bun dev\" "
+    "dev": "concurrently \"cd server; bun dev;\" \"cd client; bun dev\"",
+    "build": "concurrently \"cd server; bun run build;\" \"cd client; bun run build\"",
+    "production": "concurrently \"cd server; bun build/index.js;\" \"cd client; bun x http-server dist\""
   }
 }
