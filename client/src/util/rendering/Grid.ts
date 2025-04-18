@@ -87,9 +87,13 @@ export class Grid {
         this._walls = walls;
     }
 
-    public placeWall(x: number, y: number) {
+    public placeWall(x: number, y: number): boolean {
+        if(this._walls.hasTileAt(x, y)){
+            return false;
+        }
         this._walls.putTileAt(0, x, y);
         this._redrawTile(this._walls, x, y);
+        return true;
     }
 
     public removeWall(x: number, y: number){

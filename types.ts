@@ -4,3 +4,9 @@ export interface IInputMessage {
   up: boolean;
   down: boolean;
 }
+
+export interface ITileMessage {
+  x: number,
+  y: number,
+  type: string
+};

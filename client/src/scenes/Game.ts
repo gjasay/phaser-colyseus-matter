@@ -10,6 +10,7 @@ import { Grid } from "../util/rendering/Grid";
 import { Bodies, Composite, Engine, Vector } from "matter-js";
 import physicsConfig from "../../../config/physics.config";
 import { ServerActor } from "../prefabs/ServerActor";
+import { Tile } from "../schema/Tile";
 
 export class Game extends Scene {
   public inputHandler: InputHandler;
@@ -49,14 +50,17 @@ export class Game extends Scene {
     this._engine.world.bounds = physicsConfig.worldBounds;
     this.cameras.main.zoomTo(2);
 
-    this._grid = new Grid(this, 1024, 768);
+    this._grid = new Grid(this, 128, 128);
 
     this.input.on('pointermove', (e: Phaser.Input.Pointer) => {
       if(e.middleButtonDown()) {
         this._grid.removeWall(Math.floor(e.worldX / 32), Math.floor(e.worldY / 32));
       }
       else if(e.isDown) {
-        this._grid.placeWall(Math.floor(e.worldX / 32), Math.floor(e.worldY / 32));
+        if(this._grid.placeWall(Math.floor(e.worldX / 32), Math.floor(e.worldY / 32))){
+          console.log('tiling',Math.floor(e.worldX / 32), Math.floor(e.worldY / 32));
+          nm.instance.room.send('wall', { x: Math.floor(e.worldX / 32), y: Math.floor(e.worldY / 32), type: 'wall' })
+        }
       }
     })
     nm.instance.initialize();
@@ -79,6 +83,18 @@ export class Game extends Scene {
       Rectangle
     >;
 
+    const tiles = nm.instance.state.tiles as CollectionCallback<number, Tile>;
+    tiles.onAdd(tile => {
+      this._grid.placeWall(Math.floor(tile.x), Math.floor(tile.y));
+      console.log(tile.x, tile.y);
+      Composite.add(this._engine.world, Bodies.rectangle((tile.x * 32) + 16, (tile.y * 32) + 16, 32, 32, {
+        isStatic: true,
+        collisionFilter: {
+          category: 0b0010,
+          mask: 0b1111
+        }
+      }));
+    })
     entities.onAdd((entity) => {
       const rectangle = this.add.rectangle(
         entity.x,

@@ -1,15 +1,17 @@
 import { Room, Client } from "@colyseus/core";
-import { Player, Rectangle, State } from "./schema/GameState";
+import { Player, Rectangle, State, Tile } from "./schema/GameState";
 import {
   Engine,
   Bodies,
   Body,
   Composite,
 } from "matter-js";
-import { IInputMessage } from "../../../types";
+import { IInputMessage, ITileMessage } from "../../../types";
 import gameConfig from "../../../config/game.config";
 import physicsConfig from "../../../config/physics.config";
 import playerConfig from "../../../config/player.config";
+
+const GRID_SIZE = 128;
 
 export class MyRoom extends Room<State> {
   maxClients = 4;
@@ -57,12 +59,33 @@ export class MyRoom extends Room<State> {
     this.onMessage("input", (client: Client, payload: IInputMessage) => {
       this.state.players.get(client.sessionId).inputQueue.push(payload);
     });
+
+    this.onMessage("wall", (client: Client, payload: ITileMessage) => {
+      const i = toGrid(payload.x, payload.y);
+      this.state.tiles.push(new Tile(payload.x, payload.y));
+      console.log('added tile: ', payload.x, payload.y, i);
+      Composite.add(this._engine.world, Bodies.rectangle(
+        (payload.x * 32 + 16),
+        (payload.y * 32 + 16),
+        32, 32,
+        {
+          isStatic: true,
+          collisionFilter: {
+            category: 0b0010,
+            mask: 0b1111
+          }
+        }
+      ));
+    })
   }
 
   fixedUpdate(dt: number) {
     Engine.update(this._engine, dt);
 
     this.state.players.forEach((player) => {
+      player.x = player.body.position.x;
+      player.y = player.body.position.y;
+
       let input: IInputMessage;
       while ((input = player.inputQueue.shift())) {
         if (input.left) {
@@ -89,8 +112,6 @@ export class MyRoom extends Room<State> {
           });
         }
       }
-      player.x = player.body.position.x;
-      player.y = player.body.position.y;
     });
   }
 
@@ -126,3 +147,5 @@ export class MyRoom extends Room<State> {
     console.log("room", this.roomId, "disposing...");
   }
 }
+
+const toGrid = (x: number, y: number) => x + y * GRID_SIZE;

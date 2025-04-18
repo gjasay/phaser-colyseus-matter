@@ -1,5 +1,6 @@
 import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
 import { IInputMessage } from "../../../../types";
+import Matter from "matter-js";
 
 export class Entity extends Schema {
   @type("number") x: number = 0;
@@ -24,6 +25,10 @@ export class Rectangle extends Entity {
   }
 }
 
+export class Tile extends Entity {
+  @type("string") type: string;
+}
+
 export class Circle extends Entity {
   @type("number") radius: number = 0;
   constructor(x: number = 0, y: number = 0, radius: number = 0) {
@@ -44,4 +49,5 @@ export class State extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
   @type([Rectangle]) rects = new ArraySchema<Rectangle>();
   @type("number") score: number = 0;
+  @type([Tile]) tiles = new ArraySchema<Tile>();
 }
