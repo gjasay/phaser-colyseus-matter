@@ -1,10 +1,7 @@
 import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
 import { IInputMessage } from "../../../../types";
-<<<<<<< HEAD
 import Matter from "matter-js";
-=======
 import gameConfig from "../../../../config/game.config";
->>>>>>> Items
 
 export class Entity extends Schema {
   @type("number") x: number = 0;

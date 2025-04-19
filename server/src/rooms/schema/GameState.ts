@@ -35,6 +35,10 @@ export class Tile extends Entity {
   @type("string") type: string;
 }
 
+export class Duck extends Entity {
+  
+}
+
 export class Circle extends Entity {
   @type("number") radius: number = 0;
   constructor(x: number = 0, y: number = 0, radius: number = 0) {

@@ -6,12 +6,8 @@ import {
   Body,
   Composite,
 } from "matter-js";
-<<<<<<< HEAD
 import { IInputMessage, ITileMessage } from "../../../types";
 import gameConfig from "../../../config/game.config";
-=======
-import { IInputMessage } from "../../../types";
->>>>>>> Items
 import physicsConfig from "../../../config/physics.config";
 import playerConfig from "../../../config/player.config";
 
