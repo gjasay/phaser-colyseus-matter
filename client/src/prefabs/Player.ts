@@ -1,7 +1,8 @@
 import { Bodies, Body, Collision, Composite, Engine, Vector } from "matter-js";
 import playerConfig from "../../../config/player.config";
 import { Game } from "../scenes/Game";
-import { OptionalVector } from "./ServerActor";
+
+const LERP_FACTOR = 0.3;
 
 interface IPlayerState {
   x: number;
@@ -20,8 +21,8 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   public serverRef: Phaser.GameObjects.Arc;
   private _engine: Engine;
   public physBody: Body;
-
-  public syncedPosition: OptionalVector = {...Vector.create(0, 0), hasValue: false};
+  public serverPosition: Phaser.Math.Vector2;
+  public viewPosition: Phaser.Math.Vector2;
 
   constructor(
     scene: Game | Phaser.Scene,
@@ -33,6 +34,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   ) {
     super(scene, x, y, texture, frame);
     this._engine = engine;
+    this.viewPosition = new Phaser.Math.Vector2(x, y);
     this.physBody = CreatePlayerBody(x, y);
     Composite.add(this._engine.world, this.physBody);
 
@@ -42,10 +44,6 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
 
   public fixedUpdate(_dt: number) {
 
-    if(this.syncedPosition.hasValue) {
-      Body.setPosition(this.physBody, this.syncedPosition);
-      this.syncedPosition.hasValue = false;
-    }
     const scene = this.scene as Game;
     const { up, down, left, right } = scene.inputHandler.payload;
     if (left) {
@@ -68,8 +66,10 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
         x: 0, y: playerConfig.walkSpeed
       });
     }
-    this.x = this.physBody.position.x;
-    this.y = this.physBody.position.y;
+
+    this.viewPosition.lerp(this.physBody.position, LERP_FACTOR);
+    this.x = this.viewPosition.x;
+    this.y = this.viewPosition.y;
   }
 }
 
