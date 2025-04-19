@@ -1,4 +1,4 @@
-import { Scene } from "phaser";
+import { Scene, Time } from "phaser";
 import { NetworkManager as nm } from "../util/NetworkManager";
 import { InputHandler } from "../util/InputHandler";
 import { Player } from "../schema/Player";
@@ -6,10 +6,12 @@ import { CollectionCallback } from "@colyseus/schema";
 import { Rectangle } from "../schema/Rectangle";
 import { PlayerPrefab } from "../prefabs/Player";
 import { Grid } from "../util/rendering/Grid";
-import { Bodies, Composite, Engine } from "matter-js";
+import { Bodies, Body, Composite, Engine } from "matter-js";
 import physicsConfig from "../../../config/physics.config";
 import { ServerActor } from "../prefabs/ServerActor";
 import { Tile } from "../schema/Tile";
+
+const CORRECTION_STRENGTH = 0.2;
 
 export class Game extends Scene {
   public inputHandler: InputHandler;
@@ -42,6 +44,8 @@ export class Game extends Scene {
     this._engine.velocityIterations = physicsConfig.velocityIterations;
     this._engine.positionIterations = physicsConfig.positionIterations;
     this._engine.world.bounds = physicsConfig.worldBounds;
+
+    this.cameras.main.setDeadzone(64, 64);
 
     this._engine.gravity = physicsConfig.gravity;
     this._engine.velocityIterations = physicsConfig.velocityIterations;
@@ -114,7 +118,7 @@ export class Game extends Scene {
       nm.instance.schema(entity).bindTo(rectangle);
       this._entities.push(rectangle);
     });
-
+    // let timeSinceLastUpdate = this.time.now;
     players.onAdd((player: Player, sessionId: string) => {
       console.log("Player added:", player);
       if (sessionId === nm.instance.room.sessionId) {
@@ -134,25 +138,16 @@ export class Game extends Scene {
           const dx = nx - ox;
           const dy = ny - oy;
           const distance = Math.sqrt((dx * dx) + (dy * dy));
-          if(distance < 30) {
-            return;
+          if (distance > 30) {
+            Body.setPosition(this._clientPlayer.physBody, player);
+          } else {
+            const correction: Phaser.Math.Vector2 = new Phaser.Math.Vector2(nx, ny)
+              .subtract(this._clientPlayer.physBody.position)
+              .scale(CORRECTION_STRENGTH);
+            Body.translate(this._clientPlayer.physBody, correction);
           }
-          this._clientPlayer.syncedPosition.hasValue = true;
-          this.tweens.add({
-            targets: this._clientPlayer.syncedPosition,
-            x: player.x,
-            y: player.y,
-            duration: 100,
-            ease: "Linear",
-            onComplete: () => {
-              this.tweens.add({
-                targets: this._clientPlayer.syncedPosition,
-                alpha: 1,
-                duration: 500,
-                ease: "Linear"
-              })
-            }
-          })
+
+
         })
       } else {
         this._syncedActors.push(
