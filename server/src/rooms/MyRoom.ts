@@ -6,8 +6,12 @@ import {
   Body,
   Composite,
 } from "matter-js";
+<<<<<<< HEAD
 import { IInputMessage, ITileMessage } from "../../../types";
 import gameConfig from "../../../config/game.config";
+=======
+import { IInputMessage } from "../../../types";
+>>>>>>> Items
 import physicsConfig from "../../../config/physics.config";
 import playerConfig from "../../../config/player.config";
 
@@ -50,9 +54,9 @@ export class MyRoom extends Room<State> {
     this.setSimulationInterval((dt) => {
       elapsedTime += dt;
 
-      while (elapsedTime >= gameConfig.fixedTimestep) {
-        elapsedTime -= gameConfig.fixedTimestep;
-        this.fixedUpdate(gameConfig.fixedTimestep);
+      while (elapsedTime >= physicsConfig.fixedTimestep) {
+        elapsedTime -= physicsConfig.fixedTimestep;
+        this.fixedUpdate(physicsConfig.fixedTimestep);
       }
     });
 
