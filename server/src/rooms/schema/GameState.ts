@@ -51,6 +51,11 @@ export class Team extends Schema {
   @type("number") coins: number = gameConfig.startingCoins;
 }
 
+export class Item extends Entity {
+  @type("number") id: number = 0;
+  @type("number") teamId: number = 0;
+}
+
 export class State extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
   @type([Rectangle]) rects = new ArraySchema<Rectangle>();
