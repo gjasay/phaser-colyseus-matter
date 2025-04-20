@@ -64,31 +64,31 @@ export class MyRoom extends Room<State> {
 
     this.state.players.forEach((player) => {
       let input: IInputMessage;
-
       while ((input = player.inputQueue.shift())) {
         if (input.left) {
-          Body.applyForce(player.body, player.body.position, {
+          Body.translate(player.body, {
             x: -playerConfig.walkSpeed,
-            y: 0,
+            y: 0
           });
         } else if (input.right) {
-          Body.applyForce(player.body, player.body.position, {
+          Body.translate(player.body, {
             x: playerConfig.walkSpeed,
-            y: 0,
+            y: 0
           });
         }
 
         if (input.up) {
-          Body.applyForce(player.body, player.body.position, {
+          Body.translate(player.body, {
             x: 0,
-            y: -playerConfig.walkSpeed,
+            y: -playerConfig.walkSpeed
           });
         } else if (input.down) {
-          Body.applyForce(player.body, player.body.position, {
+          Body.translate(player.body, {
             x: 0,
-            y: playerConfig.walkSpeed,
+            y: playerConfig.walkSpeed
           });
         }
+
 
       }
       player.x = player.body.position.x;
@@ -106,11 +106,12 @@ export class MyRoom extends Room<State> {
     player.body = Bodies.circle(
       player.x,
       player.y,
-      player.radius
+      playerConfig.radius
     );
     player.body.mass = playerConfig.mass;
     player.body.friction = playerConfig.friction;
     player.body.frictionAir = playerConfig.frictionAir;
+    player.body.inertia = Infinity;
     Composite.add(this._engine.world, player.body);
   }
 
