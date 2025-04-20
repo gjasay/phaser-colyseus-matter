@@ -50,9 +50,9 @@ export class MyRoom extends Room<State> {
     this.setSimulationInterval((dt) => {
       elapsedTime += dt;
 
-      while (elapsedTime >= gameConfig.fixedTimestep) {
-        elapsedTime -= gameConfig.fixedTimestep;
-        this.fixedUpdate(gameConfig.fixedTimestep);
+      while (elapsedTime >= physicsConfig.fixedTimestep) {
+        elapsedTime -= physicsConfig.fixedTimestep;
+        this.fixedUpdate(physicsConfig.fixedTimestep);
       }
     });
 

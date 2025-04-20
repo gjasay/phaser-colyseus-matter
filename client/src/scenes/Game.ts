@@ -3,11 +3,10 @@ import { NetworkManager as nm } from "../util/NetworkManager";
 import { InputHandler } from "../util/InputHandler";
 import { Player } from "../schema/Player";
 import { CollectionCallback } from "@colyseus/schema";
-import gameConfig from "../../../config/game.config";
 import { Rectangle } from "../schema/Rectangle";
 import { PlayerPrefab } from "../prefabs/Player";
 import { Grid } from "../util/rendering/Grid";
-import { Bodies, Composite, Engine, Vector } from "matter-js";
+import { Bodies, Composite, Engine } from "matter-js";
 import physicsConfig from "../../../config/physics.config";
 import { ServerActor } from "../prefabs/ServerActor";
 import { Tile } from "../schema/Tile";
@@ -189,13 +188,13 @@ export class Game extends Scene {
 
   update(time: number, dt: number) {
     this._accumulator += dt;
-    while (this._accumulator >= gameConfig.fixedTimestep) {
-      this._accumulator -= gameConfig.fixedTimestep;
-      this.fixedUpdate(time, gameConfig.fixedTimestep);
+    while (this._accumulator >= physicsConfig.fixedTimestep) {
+      this._accumulator -= physicsConfig.fixedTimestep;
+      this.fixedUpdate(time, physicsConfig.fixedTimestep);
     }
   }
 
-  fixedUpdate(time: number, dt: number) {
+  fixedUpdate(_time: number, dt: number) {
     if (!this.inputHandler?.payload || !this._clientPlayer) {
       return;
     }
