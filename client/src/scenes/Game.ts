@@ -1,4 +1,4 @@
-import { Scene, Time } from "phaser";
+import { Scene } from "phaser";
 import { NetworkManager as nm } from "../util/NetworkManager";
 import { InputHandler } from "../util/InputHandler";
 import { Player } from "../schema/Player";
@@ -34,8 +34,6 @@ export class Game extends Scene {
 
     this.load.image("background", "bg.png");
     this.load.image("logo", "logo.png");
-    this.load.image("red", "red_cube.png");
-    this.load.image("green", "green_cube.png");
     this.load.image("walls", "tiles/wall.png");
     this.load.image("wizard", "Ents/wizard.png");
     this.load.image("mainMap", "Maps/main_map/main_map.png");

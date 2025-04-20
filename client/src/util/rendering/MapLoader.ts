@@ -1,19 +1,19 @@
-interface TilesetterPosition {
+interface ITilesetterPosition {
   x: number;
   y: number;
   id: number;
 }
 
-interface TilesetterLayer {
+interface ITilesetterLayer {
   name: string;
-  positions: TilesetterPosition[];
+  positions: ITilesetterPosition[];
 }
 
-interface TilesetterData {
+interface ITilesetterData {
   tile_size: number;
   map_width: number;
   map_height: number;
-  layers: TilesetterLayer[];
+  layers: ITilesetterLayer[];
 }
 
 export class TilesetterMapLoader {
@@ -26,7 +26,7 @@ export class TilesetterMapLoader {
   }
 
   public load(tilesetKey: string, mapDataKey: string) {
-    const mapData = this._scene.cache.json.get(mapDataKey) as TilesetterData;
+    const mapData = this._scene.cache.json.get(mapDataKey) as ITilesetterData;
 
     // place tiles
     this._map = this._scene.make.tilemap({
@@ -39,7 +39,7 @@ export class TilesetterMapLoader {
     this._tileset = this._map.addTilesetImage(`ts_${tilesetKey}`, tilesetKey);
 
     if (!this._tileset) {
-      console.error(`Tileset ${tilesetKey} not found`);
+      console.error(`Tileset "${tilesetKey}" not found`);
       return;
     }
 
