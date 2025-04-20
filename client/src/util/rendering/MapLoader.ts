@@ -44,7 +44,7 @@ export class TilesetterMapLoader {
     }
 
     // grass layer
-    this._map.createBlankLayer("grass", this._tileset, 0, 0);
+    this._map.createBlankLayer("grass", this._tileset, 0, 0)?.setDepth(-10);
 
     for (const layer of mapData.layers) {
       for (const position of layer.positions) {

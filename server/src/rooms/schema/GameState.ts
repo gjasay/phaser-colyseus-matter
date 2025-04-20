@@ -31,10 +31,6 @@ export class Rectangle extends Entity {
   }
 }
 
-export class Tile extends Entity {
-  @type("string") type: string;
-}
-
 export class Duck extends Entity {
   
 }
@@ -49,25 +45,36 @@ export class Circle extends Entity {
 
 export class Player extends Circle {
   inputQueue: IInputMessage[] = [];
+  teamId: number = 0;
 
-  constructor(x: number = 0, y: number = 0, radius: number = 0) {
+  constructor(x: number = 0, y: number = 0, radius: number = 0, teamId: number = 0) {
     super(x, y, radius);
+    this.teamId = teamId;
   }
 }
 
 export class Team extends Schema {
   @type("number") id: number = 0;
   @type("number") coins: number = gameConfig.startingCoins;
+  playerCount: number = 0;
 }
 
-export class Item extends Entity {
-  @type("number") id: number = 0;
+export class Tile extends Entity {
+  @type("string") type: string = ""; // "coingen", "tower"  
   @type("number") teamId: number = 0;
+
+  constructor(type: string, teamId: number, x: number, y: number) {
+    super(x, y);
+
+    this.type = type;
+    this.teamId = teamId;
+  }
 }
 
 export class State extends Schema {
   @type({ map: Player }) players = new MapSchema<Player>();
+  @type(Team) team1 = new Team();
+  @type(Team) team2 = new Team();
   @type([Rectangle]) rects = new ArraySchema<Rectangle>();
-  @type("number") score: number = 0;
   @type([Tile]) tiles = new ArraySchema<Tile>();
 }

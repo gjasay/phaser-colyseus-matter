@@ -5,8 +5,9 @@ export interface IInputMessage {
   down: boolean;
 }
 
-export interface ITileMessage {
-  x: number,
-  y: number,
-  type: string
-};
+export interface IPlacementMessage {
+  x: number;
+  y: number;
+  type: string;
+}
+

@@ -6,7 +6,7 @@ import {
   Body,
   Composite,
 } from "matter-js";
-import { IInputMessage, ITileMessage } from "../../../types";
+import { IInputMessage, IPlaceItemMessage, IPlacementMessage } from "../../../types";
 import gameConfig from "../../../config/game.config";
 import physicsConfig from "../../../config/physics.config";
 import playerConfig from "../../../config/player.config";
@@ -60,9 +60,11 @@ export class MyRoom extends Room<State> {
       this.state.players.get(client.sessionId).inputQueue.push(payload);
     });
 
-    this.onMessage("wall", (client: Client, payload: ITileMessage) => {
+    this.onMessage("place", (client: Client, payload: IPlacementMessage) => {
+      const player = this.state.players.get(client.sessionId);
+
       const i = toGrid(payload.x, payload.y);
-      this.state.tiles.push(new Tile(payload.x, payload.y));
+      this.state.tiles.push(new Tile(payload.type, player.teamId, payload.x, payload.y));
       console.log('added tile: ', payload.x, payload.y, i);
       Composite.add(this._engine.world, Bodies.rectangle(
         (payload.x * 32 + 16),
@@ -117,8 +119,10 @@ export class MyRoom extends Room<State> {
 
   onJoin(client: Client, _options: any) {
     console.log(client.sessionId, "joined!");
+
+    const teamId = (this.clients.length % gameConfig.teams.players) + 1;
     // Add the player to the state
-    this.state.players.set(client.sessionId, new Player(100, 100, playerConfig.radius));
+    this.state.players.set(client.sessionId, new Player(100, 100, playerConfig.radius, teamId));
     const player = this.state.players.get(client.sessionId);
 
     // Initialize the player physics body
