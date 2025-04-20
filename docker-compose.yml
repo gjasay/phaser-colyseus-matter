@@ -1,11 +1,11 @@
 services:
   balance:
     build:
+      args:
+        VITE_GAME_SERVER: ${VITE_GAME_SERVER}
       context: .
       dockerfile: Dockerfile
     container_name: balance
-    env_file:
-      .env
     ports:
       - "2567:2567"
       - "8080:8080"
