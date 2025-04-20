@@ -1,41 +1,41 @@
 interface ITeamConfig {
-  startingCoins: number;
+  coins: number;
   players: number;
 }
 
 interface IStructureConfig {
-  type: string;
   cost: number;
   hp: number;
 }
 
 interface IGameConfig {
   teams: ITeamConfig;
-  structures: IStructureConfig[];
+  structures: {
+    tower: IStructureConfig;
+    coingen: IStructureConfig;
+    wall: IStructureConfig;
+  }
 }
 
 const gameConfig: IGameConfig = {
   teams: {
-    startingCoins: 100,
+    coins: 100,
     players: 2,
   },
-  structures: [
-    {
-      type: "tower",
+  structures: {
+    tower: {
       cost: 10,
       hp: 100,
     },
-    {
-      type: "coingen",
+    coingen: {
       cost: 5,
       hp: 50,
     },
-    {
-      type: "wall",
-      cost: 2,
-      hp: 25,
+    wall: {
+      cost: 1,
+      hp: 10,
     },
-  ],
-};
+      },
+  };
 
 export default gameConfig;

@@ -31,9 +31,7 @@ export class Rectangle extends Entity {
   }
 }
 
-export class Duck extends Entity {
-  
-}
+export class Duck extends Entity { }
 
 export class Circle extends Entity {
   @type("number") radius: number = 0;
@@ -47,7 +45,12 @@ export class Player extends Circle {
   inputQueue: IInputMessage[] = [];
   teamId: number = 0;
 
-  constructor(x: number = 0, y: number = 0, radius: number = 0, teamId: number = 0) {
+  constructor(
+    x: number = 0,
+    y: number = 0,
+    radius: number = 0,
+    teamId: number = 0,
+  ) {
     super(x, y, radius);
     this.teamId = teamId;
   }
@@ -55,19 +58,35 @@ export class Player extends Circle {
 
 export class Team extends Schema {
   @type("number") id: number = 0;
-  @type("number") coins: number = gameConfig.startingCoins;
+  @type("number") coins: number = gameConfig.teams.coins;
   playerCount: number = 0;
 }
 
 export class Tile extends Entity {
-  @type("string") type: string = ""; // "coingen", "tower"  
+  @type("string") type: string = ""; // "coingen", "tower"
   @type("number") teamId: number = 0;
+  @type("number") cost: number;
+  @type("number") hp: number;
 
   constructor(type: string, teamId: number, x: number, y: number) {
     super(x, y);
-
     this.type = type;
     this.teamId = teamId;
+
+    switch (type) {
+      case "coingen":
+        this.cost = gameConfig.structures.coingen.cost;
+        this.hp = gameConfig.structures.coingen.hp;
+        break;
+      case "tower":
+        this.cost = gameConfig.structures.tower.cost;
+        this.hp = gameConfig.structures.tower.hp;
+        break;
+      case "wall":
+        this.cost = gameConfig.structures.wall.cost;
+        this.hp = gameConfig.structures.wall.hp;
+        break;
+    }
   }
 }
 

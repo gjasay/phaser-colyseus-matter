@@ -1,15 +1,17 @@
 import { Room, Client } from "@colyseus/core";
 import { Player, Rectangle, State, Tile } from "./schema/GameState";
+import { Engine, Bodies, Body, Composite } from "matter-js";
 import {
-  Engine,
-  Bodies,
-  Body,
-  Composite,
-} from "matter-js";
-import { IInputMessage, IPlaceItemMessage, IPlacementMessage } from "../../../types";
+  IInputMessage,
+  IPlacementMessage,
+  ITilesetterData,
+} from "../../../types";
 import gameConfig from "../../../config/game.config";
 import physicsConfig from "../../../config/physics.config";
 import playerConfig from "../../../config/player.config";
+import { loadCollisionLayer } from "./util/LoadCollisionLayer";
+import * as fs from "fs";
+import * as path from "path";
 
 const GRID_SIZE = 128;
 
@@ -25,25 +27,19 @@ export class MyRoom extends Room<State> {
     this._engine.positionIterations = physicsConfig.positionIterations;
     this._engine.world.bounds = physicsConfig.worldBounds;
 
-    const floor = Bodies.rectangle(
-      0,
-      this._engine.world.bounds.max.y,
-      this._engine.world.bounds.max.x,
-      20,
-      {
-        isStatic: true,
-      },
+    // Load map data and init collision layer
+    const filePath = path.resolve(
+      __dirname,
+      "../../../client/public/assets/Maps/main_map/main_map.json",
     );
-
-    Composite.add(this._engine.world, floor);
-    this.state.rects.push(
-      new Rectangle(
-        0,
-        this._engine.world.bounds.max.y,
-        this._engine.world.bounds.max.x,
-        20,
-      ),
-    );
+    fs.readFile(filePath, "utf8", (err, data) => {
+      if (err) {
+        console.error("Error reading file:", err);
+        return;
+      }
+      const mapJson = JSON.parse(data);
+      loadCollisionLayer(this._engine, mapJson as ITilesetterData);
+    });
 
     // Create fixed update loop
     let elapsedTime = 0;
@@ -64,21 +60,21 @@ export class MyRoom extends Room<State> {
       const player = this.state.players.get(client.sessionId);
 
       const i = toGrid(payload.x, payload.y);
-      this.state.tiles.push(new Tile(payload.type, player.teamId, payload.x, payload.y));
-      console.log('added tile: ', payload.x, payload.y, i);
-      Composite.add(this._engine.world, Bodies.rectangle(
-        (payload.x * 32 + 16),
-        (payload.y * 32 + 16),
-        32, 32,
-        {
+      this.state.tiles.push(
+        new Tile(payload.type, player.teamId, payload.x, payload.y),
+      );
+      console.log("added tile: ", payload.x, payload.y, i);
+      Composite.add(
+        this._engine.world,
+        Bodies.rectangle(payload.x * 32 + 16, payload.y * 32 + 16, 32, 32, {
           isStatic: true,
           collisionFilter: {
             category: 0b0010,
-            mask: 0b1111
-          }
-        }
-      ));
-    })
+            mask: 0b1111,
+          },
+        }),
+      );
+    });
   }
 
   fixedUpdate(dt: number) {
@@ -93,24 +89,24 @@ export class MyRoom extends Room<State> {
         if (input.left) {
           Body.translate(player.body, {
             x: -playerConfig.walkSpeed,
-            y: 0
+            y: 0,
           });
         } else if (input.right) {
           Body.translate(player.body, {
             x: playerConfig.walkSpeed,
-            y: 0
+            y: 0,
           });
         }
 
         if (input.up) {
           Body.translate(player.body, {
             x: 0,
-            y: -playerConfig.walkSpeed
+            y: -playerConfig.walkSpeed,
           });
         } else if (input.down) {
           Body.translate(player.body, {
             x: 0,
-            y: playerConfig.walkSpeed
+            y: playerConfig.walkSpeed,
           });
         }
       }
@@ -122,20 +118,19 @@ export class MyRoom extends Room<State> {
 
     const teamId = (this.clients.length % gameConfig.teams.players) + 1;
     // Add the player to the state
-    this.state.players.set(client.sessionId, new Player(100, 100, playerConfig.radius, teamId));
+    this.state.players.set(
+      client.sessionId,
+      new Player(100, 100, playerConfig.radius, teamId),
+    );
     const player = this.state.players.get(client.sessionId);
 
     // Initialize the player physics body
-    player.body = Bodies.circle(
-      player.x,
-      player.y,
-      playerConfig.radius, {
-        collisionFilter: {
-          category: 0b0001,
-          mask: 0b1110
-        }
-      }
-    );
+    player.body = Bodies.circle(player.x, player.y, playerConfig.radius, {
+      collisionFilter: {
+        category: 0b0001,
+        mask: 0b1110,
+      },
+    });
     player.body.mass = playerConfig.mass;
     player.body.friction = playerConfig.friction;
     player.body.frictionAir = playerConfig.frictionAir;

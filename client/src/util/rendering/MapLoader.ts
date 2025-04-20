@@ -1,20 +1,4 @@
-interface ITilesetterPosition {
-  x: number;
-  y: number;
-  id: number;
-}
-
-interface ITilesetterLayer {
-  name: string;
-  positions: ITilesetterPosition[];
-}
-
-interface ITilesetterData {
-  tile_size: number;
-  map_width: number;
-  map_height: number;
-  layers: ITilesetterLayer[];
-}
+import { ITilesetterData } from "../../../../types";
 
 export class TilesetterMapLoader {
   private _scene: Phaser.Scene;
