@@ -19,7 +19,7 @@ export class NetworkManager {
   }
 
   public initialize(): void {
-    this._client = new Colyseus.Client(import.meta.env.GAME_SERVER);
+    this._client = new Colyseus.Client(import.meta.env.VITE_GAME_SERVER);
   }
 
   public async connectToRoom(
