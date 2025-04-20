@@ -139,8 +139,8 @@ export class Grid {
     x: number,
     y: number,
   ) {
-      this._calculateCellNeighbor(layer, _x, _y), this._drawTile(layer, _x, _y);
     this.forEachNeighbor(layer, x, y, (layer, _x, _y) => {
+      this._calculateCellNeighbor(layer, _x, _y), this._drawTile(layer, _x, _y);
     });
     this._drawTile(layer, x, y);
   }

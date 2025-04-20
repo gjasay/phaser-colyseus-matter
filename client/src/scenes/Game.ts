@@ -3,7 +3,6 @@ import { NetworkManager as nm } from "../util/NetworkManager";
 import { InputHandler } from "../util/InputHandler";
 import { Player } from "../schema/Player";
 import { CollectionCallback } from "@colyseus/schema";
-import { Rectangle } from "../schema/Rectangle";
 import { PlayerPrefab } from "../prefabs/Player";
 import { Grid } from "../util/rendering/Grid";
 import { Bodies, Body, Composite, Engine } from "matter-js";
@@ -19,7 +18,6 @@ export class Game extends Scene {
   private _accumulator: number = 0;
   private _clientPlayer: PlayerPrefab;
   private _syncedActors: ServerActor[] = [];
-  private _entities: Phaser.GameObjects.Rectangle[] = [];
   private _engine: Engine;
 
   private _grid: Grid;
