@@ -4,7 +4,7 @@ type Tile = {
   trueCardinality: number;
 };
 
-type TStructure = "coingen" | "tower";
+export type TStructure = "coingen" | "tower" | "wall";
 
 const CardinalityMap: Record<number, number> = {
   56: 0,
@@ -116,6 +116,9 @@ export class Grid {
         return true;
       case "tower":
         this._structures.putTileAt(1, x, y);
+        return true;
+      case "wall":
+        this.placeWall(x, y);
         return true;
     }
   }
