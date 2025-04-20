@@ -1,5 +1,5 @@
 import { Room, Client } from "@colyseus/core";
-import { Player, Rectangle, State, Tile } from "./schema/GameState";
+import { Player, State, Tile } from "./schema/GameState";
 import { Engine, Bodies, Body, Composite } from "matter-js";
 import {
   IInputMessage,
@@ -74,6 +74,10 @@ export class MyRoom extends Room<State> {
           },
         }),
       );
+    });
+
+    this.onMessage("remove", (client: Client, payload: IPlacementMessage) => {
+
     });
   }
 

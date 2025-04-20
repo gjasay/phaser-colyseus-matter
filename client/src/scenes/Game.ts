@@ -26,6 +26,10 @@ export class Game extends Scene {
   private _mode: TGameMode = "build";
   private _selectedStructure: TStructure = "coingen";
 
+  get engine() {
+    return this._engine;
+  }
+
   constructor() {
     super("Game");
   }
