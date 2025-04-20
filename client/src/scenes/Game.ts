@@ -10,6 +10,7 @@ import { Bodies, Composite, Engine } from "matter-js";
 import physicsConfig from "../../../config/physics.config";
 import { ServerActor } from "../prefabs/ServerActor";
 import { Tile } from "../schema/Tile";
+import { TilesetterMapLoader } from "../util/rendering/MapLoader";
 
 export class Game extends Scene {
   public inputHandler: InputHandler;
@@ -20,6 +21,7 @@ export class Game extends Scene {
   private _engine: Engine;
 
   private _grid: Grid;
+  private _mapLoader: TilesetterMapLoader;
 
   constructor() {
     super("Game");
@@ -34,6 +36,8 @@ export class Game extends Scene {
     this.load.image("green", "green_cube.png");
     this.load.image("walls", "tiles/wall.png");
     this.load.image("wizard", "Ents/wizard.png");
+    this.load.image("mainMap", "Maps/main_map/main_map.png");
+    this.load.json("mapData", "Maps/main_map/main_map.json");
   }
 
   async create() {
@@ -51,17 +55,35 @@ export class Game extends Scene {
 
     this._grid = new Grid(this, 128, 128);
 
-    this.input.on('pointermove', (e: Phaser.Input.Pointer) => {
-      if(e.middleButtonDown()) {
-        this._grid.removeWall(Math.floor(e.worldX / 32), Math.floor(e.worldY / 32));
-      }
-      else if(e.isDown) {
-        if(this._grid.placeWall(Math.floor(e.worldX / 32), Math.floor(e.worldY / 32))){
-          console.log('tiling',Math.floor(e.worldX / 32), Math.floor(e.worldY / 32));
-          nm.instance.room.send('wall', { x: Math.floor(e.worldX / 32), y: Math.floor(e.worldY / 32), type: 'wall' })
+    this._mapLoader = new TilesetterMapLoader(this);
+    this._mapLoader.load("mainMap", "mapData");
+
+    this.input.on("pointermove", (e: Phaser.Input.Pointer) => {
+      if (e.middleButtonDown()) {
+        this._grid.removeWall(
+          Math.floor(e.worldX / 32),
+          Math.floor(e.worldY / 32),
+        );
+      } else if (e.isDown) {
+        if (
+          this._grid.placeWall(
+            Math.floor(e.worldX / 32),
+            Math.floor(e.worldY / 32),
+          )
+        ) {
+          console.log(
+            "tiling",
+            Math.floor(e.worldX / 32),
+            Math.floor(e.worldY / 32),
+          );
+          nm.instance.room.send("wall", {
+            x: Math.floor(e.worldX / 32),
+            y: Math.floor(e.worldY / 32),
+            type: "wall",
+          });
         }
       }
-    })
+    });
     nm.instance.initialize();
     await nm.instance.connectToRoom("find");
 
@@ -83,17 +105,20 @@ export class Game extends Scene {
     >;
 
     const tiles = nm.instance.state.tiles as CollectionCallback<number, Tile>;
-    tiles.onAdd(tile => {
+    tiles.onAdd((tile) => {
       this._grid.placeWall(Math.floor(tile.x), Math.floor(tile.y));
       console.log(tile.x, tile.y);
-      Composite.add(this._engine.world, Bodies.rectangle((tile.x * 32) + 16, (tile.y * 32) + 16, 32, 32, {
-        isStatic: true,
-        collisionFilter: {
-          category: 0b0010,
-          mask: 0b1111
-        }
-      }));
-    })
+      Composite.add(
+        this._engine.world,
+        Bodies.rectangle(tile.x * 32 + 16, tile.y * 32 + 16, 32, 32, {
+          isStatic: true,
+          collisionFilter: {
+            category: 0b0010,
+            mask: 0b1111,
+          },
+        }),
+      );
+    });
     entities.onAdd((entity) => {
       const rectangle = this.add.rectangle(
         entity.x,
@@ -129,12 +154,12 @@ export class Game extends Scene {
         nm.instance.schema(player).bindTo(this._clientPlayer.serverState);
         nm.instance.schema(player).bindTo(this._clientPlayer.serverRef);
         nm.instance.schema(player).onChange(() => {
-          const {x: nx, y: ny} = player;
-          const {x: ox, y: oy} = this._clientPlayer;
+          const { x: nx, y: ny } = player;
+          const { x: ox, y: oy } = this._clientPlayer;
           const dx = nx - ox;
           const dy = ny - oy;
-          const distance = Math.sqrt((dx * dx) + (dy * dy));
-          if(distance < 30) {
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < 30) {
             return;
           }
           this._clientPlayer.syncedPosition.hasValue = true;
@@ -149,18 +174,14 @@ export class Game extends Scene {
                 targets: this._clientPlayer.syncedPosition,
                 alpha: 1,
                 duration: 500,
-                ease: "Linear"
-              })
-            }
-          })
-        })
+                ease: "Linear",
+              });
+            },
+          });
+        });
       } else {
         this._syncedActors.push(
-          new ServerActor(
-            this, this._engine,
-            player.x, player.y,
-            "wizard"
-          )
+          new ServerActor(this, this._engine, player.x, player.y, "wizard"),
         );
         nm.instance.schema(player).onChange(() => {
           const syncedPlayer =
@@ -199,7 +220,7 @@ export class Game extends Scene {
       return;
     }
     this._clientPlayer.fixedUpdate(dt);
-    for(const actor of this._syncedActors) {
+    for (const actor of this._syncedActors) {
       actor.fixedUpdate(dt);
     }
     Engine.update(this._engine, dt);
