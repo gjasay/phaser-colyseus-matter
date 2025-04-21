@@ -34,18 +34,6 @@ export class Game extends Scene {
     super("Game");
   }
 
-  preload() {
-    this.load.setPath("assets");
-
-    this.load.image("background", "bg.png");
-    this.load.image("logo", "logo.png");
-    this.load.image("walls", "tiles/wall.png");
-    this.load.image("structures", "tiles/structures.png");
-    this.load.image("wizard", "Ents/wizard.png");
-    this.load.image("mainMap", "Maps/main_map/main_map.png");
-    this.load.json("mapData", "Maps/main_map/main_map.json");
-  }
-
   async create() {
     this._engine = Engine.create();
     this._engine.gravity = physicsConfig.gravity;
@@ -65,6 +53,8 @@ export class Game extends Scene {
 
     this._mapLoader = new TilesetterMapLoader(this);
     this._mapLoader.load("mainMap", "mapData");
+
+    this.scene.launch("UI");
 
     this.input.on("wheel", (e: WheelEvent) => {
       if (e.deltaY > 0) {
