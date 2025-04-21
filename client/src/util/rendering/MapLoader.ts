@@ -21,6 +21,8 @@ export class TilesetterMapLoader {
   private _map: Phaser.Tilemaps.Tilemap;
   private _tileset: null | Phaser.Tilemaps.Tileset;
 
+  private _layers: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map<string, Phaser.Tilemaps.TilemapLayer>();
+
   constructor(scene: Phaser.Scene) {
     this._scene = scene;
   }
@@ -44,22 +46,17 @@ export class TilesetterMapLoader {
     }
 
     // grass layer
-    this._map.createBlankLayer("grass", this._tileset, 0, 0);
+    //this._map.createBlankLayer("grass", this._tileset, 0, 0);
 
     for (const layer of mapData.layers) {
-      for (const position of layer.positions) {
-        if (layer.name !== "Grass") continue;
-        this._map.putTileAt(position.id, position.x, position.y);
+      const newLayer = this._map.createBlankLayer(layer.name, this._tileset, 0, 0);
+      if(newLayer == null) {
+        throw new Error("Failed to load map! Layer failed to create | " + layer.name);
       }
-    }
 
-    // collision layer
-    this._map.createBlankLayer("obstacle", this._tileset, 0, 0);
-
-    for (const layer of mapData.layers) {
+      this._layers.set(layer.name, newLayer);
       for (const position of layer.positions) {
-        if (layer.name !== "Obstacle") continue;
-        this._map.putTileAt(position.id, position.x, position.y);
+        newLayer.putTileAt(position.id, position.x, position.y);
       }
     }
   }
