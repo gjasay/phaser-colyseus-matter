@@ -7,9 +7,7 @@ export interface OptionalVector extends Vector {
 
 export class ServerActor extends Phaser.GameObjects.Sprite {
     private _engine: Engine;
-    public physBody: Body;
-
-    public syncedPos: OptionalVector = {... Vector.create(0, 0), hasValue: false };
+    public syncedPos: Phaser.Math.Vector2;
     constructor(
         scene: Phaser.Scene,
         engine: Engine,
@@ -19,19 +17,11 @@ export class ServerActor extends Phaser.GameObjects.Sprite {
     ) {
         super(scene, x, y, texture);
         this._engine = engine;
-        this.physBody = CreatePlayerBody(x, y);
-        Composite.add(this._engine.world, this.physBody);
-        console.log('adding to world');
         scene.add.existing(this);
     }
 
-    public fixedUpdate(dt: number): void {
-        if(this.syncedPos.hasValue) {
-            console.log("Have synced pos")
-            Body.setPosition(this.physBody, this.syncedPos);
-            this.syncedPos.hasValue = false;
-        }
-        this.x = this.physBody.position.x;
-        this.y = this.physBody.position.y;
+    public update(dt: number): void {
+        const newPos = (new Phaser.Math.Vector2(this.x, this.y)).lerp(this.syncedPos, 0.3);
+        this.setPosition(newPos.x, newPos.y);
     }
 }

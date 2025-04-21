@@ -154,7 +154,6 @@ export class Game extends Scene {
         }),
       );
     });
-    // let timeSinceLastUpdate = this.time.now;
     players.onAdd((player: Player, sessionId: string) => {
       console.log("Player added:", player);
       if (sessionId === nm.instance.room.sessionId) {
@@ -193,22 +192,7 @@ export class Game extends Scene {
         nm.instance.schema(player).onChange(() => {
           const syncedPlayer =
             this._syncedActors[this._syncedActors.length - 1];
-          syncedPlayer.syncedPos.hasValue = true;
-          this.tweens.add({
-            targets: syncedPlayer.syncedPos,
-            x: player.x,
-            y: player.y,
-            duration: 100,
-            ease: "Power1",
-            onComplete: () => {
-              this.tweens.add({
-                targets: syncedPlayer.syncedPos,
-                alpha: 1,
-                duration: 500,
-                ease: "Power1",
-              });
-            },
-          });
+          syncedPlayer.syncedPos = new Phaser.Math.Vector2(player.x, player.y);
         });
       }
     });
@@ -216,6 +200,9 @@ export class Game extends Scene {
 
   update(time: number, dt: number) {
     this._accumulator += dt;
+    for (const actor of this._syncedActors) {
+      actor.update(dt);
+    }
     while (this._accumulator >= physicsConfig.fixedTimestep) {
       this._accumulator -= physicsConfig.fixedTimestep;
       this.fixedUpdate(time, physicsConfig.fixedTimestep);
@@ -227,9 +214,6 @@ export class Game extends Scene {
       return;
     }
     this._clientPlayer.fixedUpdate(dt);
-    for (const actor of this._syncedActors) {
-      actor.fixedUpdate(dt);
-    }
     if (this.inputHandler.payload.toggleMode) {
       this._mode = this._mode === "build" ? "fight" : "build";
       this.inputHandler.payload.toggleMode = false;
