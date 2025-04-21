@@ -3,9 +3,8 @@ import { NetworkManager as nm } from "../util/NetworkManager";
 import { InputHandler } from "../util/InputHandler";
 import { Player } from "../schema/Player";
 import { CollectionCallback } from "@colyseus/schema";
-import { Rectangle } from "../schema/Rectangle";
 import { PlayerPrefab } from "../prefabs/Player";
-import { Grid } from "../util/rendering/Grid";
+import { Grid, TStructure } from "../util/rendering/Grid";
 import { Bodies, Body, Composite, Engine } from "matter-js";
 import physicsConfig from "../../../config/physics.config";
 import { ServerActor } from "../prefabs/ServerActor";
@@ -14,30 +13,25 @@ import { TilesetterMapLoader } from "../util/rendering/MapLoader";
 
 const CORRECTION_STRENGTH = 0.2;
 
+type TGameMode = "build" | "fight";
+
 export class Game extends Scene {
   public inputHandler: InputHandler;
   private _accumulator: number = 0;
   private _clientPlayer: PlayerPrefab;
   private _syncedActors: ServerActor[] = [];
-  private _entities: Phaser.GameObjects.Rectangle[] = [];
   private _engine: Engine;
-
   private _grid: Grid;
   private _mapLoader: TilesetterMapLoader;
+  private _mode: TGameMode = "build";
+  private _selectedStructure: TStructure = "coingen";
+
+  get engine() {
+    return this._engine;
+  }
 
   constructor() {
     super("Game");
-  }
-
-  preload() {
-    this.load.setPath("assets");
-
-    this.load.image("background", "bg.png");
-    this.load.image("logo", "logo.png");
-    this.load.image("walls", "tiles/wall.png");
-    this.load.image("wizard", "Ents/wizard.png");
-    this.load.image("mainMap", "Maps/main_map/main_map.png");
-    this.load.json("mapData", "Maps/main_map/main_map.json");
   }
 
   async create() {
@@ -60,15 +54,40 @@ export class Game extends Scene {
     this._mapLoader = new TilesetterMapLoader(this);
     this._mapLoader.load("mainMap", "mapData");
 
+    this.scene.launch("UI");
+
+    this.input.on("wheel", (e: WheelEvent) => {
+      if (e.deltaY > 0) {
+        // cycle throw structures
+        if (this._selectedStructure === "coingen") {
+          this._selectedStructure = "tower";
+        } else if (this._selectedStructure === "tower") {
+          this._selectedStructure = "wall";
+        } else {
+          this._selectedStructure = "coingen";
+        }
+      } else {
+        // cycle throw structures
+        if (this._selectedStructure === "coingen") {
+          this._selectedStructure = "wall";
+        } else if (this._selectedStructure === "tower") {
+          this._selectedStructure = "coingen";
+        } else {
+          this._selectedStructure = "tower";
+        }
+      }
+    });
+
     this.input.on("pointermove", (e: Phaser.Input.Pointer) => {
       if (e.middleButtonDown()) {
         this._grid.removeWall(
           Math.floor(e.worldX / 32),
           Math.floor(e.worldY / 32),
         );
-      } else if (e.isDown) {
+      } else if (e.isDown && this._mode === "build") {
         if (
-          this._grid.placeWall(
+          this._grid.placeStructure(
+            this._selectedStructure,
             Math.floor(e.worldX / 32),
             Math.floor(e.worldY / 32),
           )
@@ -78,10 +97,10 @@ export class Game extends Scene {
             Math.floor(e.worldX / 32),
             Math.floor(e.worldY / 32),
           );
-          nm.instance.room.send("wall", {
+          nm.instance.room.send("place", {
             x: Math.floor(e.worldX / 32),
             y: Math.floor(e.worldY / 32),
-            type: "wall",
+            type: this._selectedStructure,
           });
         }
       }
@@ -94,6 +113,7 @@ export class Game extends Scene {
       right: ["D", Phaser.Input.Keyboard.KeyCodes.RIGHT],
       up: ["W", Phaser.Input.Keyboard.KeyCodes.UP],
       down: ["S", Phaser.Input.Keyboard.KeyCodes.DOWN],
+      toggleMode: ["F"],
     });
     this.inputHandler.startListening();
 
@@ -101,15 +121,28 @@ export class Game extends Scene {
       string,
       Player
     >;
-    const entities = nm.instance.state.rects as CollectionCallback<
-      number,
-      Rectangle
-    >;
 
     const tiles = nm.instance.state.tiles as CollectionCallback<number, Tile>;
     tiles.onAdd((tile) => {
-      this._grid.placeWall(Math.floor(tile.x), Math.floor(tile.y));
-      console.log(tile.x, tile.y);
+      switch (tile.type) {
+        case "tower":
+          this._grid.placeStructure(
+            "tower",
+            Math.floor(tile.x),
+            Math.floor(tile.y),
+          );
+          break;
+        case "coingen":
+          this._grid.placeStructure(
+            "coingen",
+            Math.floor(tile.x),
+            Math.floor(tile.y),
+          );
+          break;
+        case "wall":
+          this._grid.placeWall(Math.floor(tile.x), Math.floor(tile.y));
+          break;
+      }
       Composite.add(
         this._engine.world,
         Bodies.rectangle(tile.x * 32 + 16, tile.y * 32 + 16, 32, 32, {
@@ -120,26 +153,6 @@ export class Game extends Scene {
           },
         }),
       );
-    });
-    entities.onAdd((entity) => {
-      const rectangle = this.add.rectangle(
-        entity.x,
-        entity.y,
-        entity.width,
-        entity.height,
-        0xff0000,
-      );
-      //this._engine.C.add.rectangle(
-      const floor = Bodies.rectangle(
-        entity.x,
-        entity.y,
-        entity.width,
-        entity.height,
-        { isStatic: true },
-      );
-      Composite.add(this._engine.world, floor);
-      nm.instance.schema(entity).bindTo(rectangle);
-      this._entities.push(rectangle);
     });
     // let timeSinceLastUpdate = this.time.now;
     players.onAdd((player: Player, sessionId: string) => {
@@ -160,18 +173,19 @@ export class Game extends Scene {
           const { x: ox, y: oy } = this._clientPlayer;
           const dx = nx - ox;
           const dy = ny - oy;
-          const distance = Math.sqrt((dx * dx) + (dy * dy));
+          const distance = Math.sqrt(dx * dx + dy * dy);
           if (distance > 30) {
             Body.setPosition(this._clientPlayer.physBody, player);
           } else {
-            const correction: Phaser.Math.Vector2 = new Phaser.Math.Vector2(nx, ny)
+            const correction: Phaser.Math.Vector2 = new Phaser.Math.Vector2(
+              nx,
+              ny,
+            )
               .subtract(this._clientPlayer.physBody.position)
               .scale(CORRECTION_STRENGTH);
             Body.translate(this._clientPlayer.physBody, correction);
           }
-
-
-        })
+        });
       } else {
         this._syncedActors.push(
           new ServerActor(this, this._engine, player.x, player.y, "wizard"),
@@ -215,6 +229,10 @@ export class Game extends Scene {
     this._clientPlayer.fixedUpdate(dt);
     for (const actor of this._syncedActors) {
       actor.fixedUpdate(dt);
+    }
+    if (this.inputHandler.payload.toggleMode) {
+      this._mode = this._mode === "build" ? "fight" : "build";
+      this.inputHandler.payload.toggleMode = false;
     }
     Engine.update(this._engine, dt);
     this.inputHandler.sync();

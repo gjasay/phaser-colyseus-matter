@@ -19,8 +19,8 @@
   "license": "MIT",
   "licenseUrl": "http://www.opensource.org/licenses/mit-license.php",
   "scripts": {
-    "dev": "bunx --bun vite --config vite/config.dev.mjs",
-    "build": "bunx --bun vite build --config vite/config.prod.mjs",
+    "dev": "bun x --bun vite --config vite/config.dev.mjs",
+    "build": "bun x --bun vite build --config vite/config.prod.mjs",
     "schema": "bunx schema-codegen ../server/src/rooms/schema/GameState.ts --output ./src/schema/ --ts"
   },
   "dependencies": {

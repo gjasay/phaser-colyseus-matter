@@ -1,27 +1,11 @@
-interface ITilesetterPosition {
-  x: number;
-  y: number;
-  id: number;
-}
-
-interface ITilesetterLayer {
-  name: string;
-  positions: ITilesetterPosition[];
-}
-
-interface ITilesetterData {
-  tile_size: number;
-  map_width: number;
-  map_height: number;
-  layers: ITilesetterLayer[];
-}
+import { Bodies, Composite } from "matter-js";
+import { ITilesetterData } from "../../../../types";
+import { Game } from "../../scenes/Game";
 
 export class TilesetterMapLoader {
-  private _scene: Phaser.Scene;
+  private _scene: Phaser.Scene | Game;
   private _map: Phaser.Tilemaps.Tilemap;
   private _tileset: null | Phaser.Tilemaps.Tileset;
-
-  private _layers: Map<string, Phaser.Tilemaps.TilemapLayer> = new Map<string, Phaser.Tilemaps.TilemapLayer>();
 
   constructor(scene: Phaser.Scene) {
     this._scene = scene;
@@ -29,6 +13,7 @@ export class TilesetterMapLoader {
 
   public load(tilesetKey: string, mapDataKey: string) {
     const mapData = this._scene.cache.json.get(mapDataKey) as ITilesetterData;
+    const scene = this._scene as Game;
 
     // place tiles
     this._map = this._scene.make.tilemap({
@@ -46,17 +31,38 @@ export class TilesetterMapLoader {
     }
 
     // grass layer
-    //this._map.createBlankLayer("grass", this._tileset, 0, 0);
+    this._map.createBlankLayer("grass", this._tileset, 0, 0)?.setDepth(-10);
 
     for (const layer of mapData.layers) {
-      const newLayer = this._map.createBlankLayer(layer.name, this._tileset, 0, 0);
-      if(newLayer == null) {
-        throw new Error("Failed to load map! Layer failed to create | " + layer.name);
-      }
-
-      this._layers.set(layer.name, newLayer);
       for (const position of layer.positions) {
-        newLayer.putTileAt(position.id, position.x, position.y);
+        if (layer.name !== "Grass") continue;
+        this._map.putTileAt(position.id, position.x, position.y);
+      }
+    }
+
+    // collision layer
+    this._map.createBlankLayer("obstacle", this._tileset, 0, 0);
+
+    for (const layer of mapData.layers) {
+      for (const position of layer.positions) {
+        if (layer.name !== "Obstacle") continue;
+        this._map.putTileAt(position.id, position.x, position.y);
+        Composite.add(
+          scene.engine.world,
+          Bodies.rectangle(
+            position.x * mapData.tile_size + mapData.tile_size / 2,
+            position.y * mapData.tile_size + mapData.tile_size / 2,
+            mapData.tile_size,
+            mapData.tile_size,
+            {
+              isStatic: true,
+              collisionFilter: {
+                category: 0b0010,
+                mask: 0b1111,
+              },
+            },
+          ),
+        );
       }
     }
   }

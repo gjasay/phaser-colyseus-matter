@@ -1,6 +1,8 @@
 import { Game as MainGame } from "./scenes/Game";
 import { AUTO, Game, Scale, Types } from "phaser";
 import physicsConfig from "../../config/physics.config";
+import { UI } from "./scenes/UI";
+import { Preloader } from "./scenes/Preloader";
 
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
@@ -26,7 +28,7 @@ const config: Types.Core.GameConfig = {
       setBounds: physicsConfig.worldBounds,
     },
   },
-  scene: [MainGame],
+  scene: [Preloader, MainGame, UI],
 };
 
 export default new Game(config);
