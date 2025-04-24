@@ -1,6 +1,12 @@
 import { Engine } from "matter-js";
 import { Scene } from "phaser";
 
+export const Structures = {
+    CoinGenerator: 0,
+    Tower: 1,
+    Wall: 2
+} as const;
+
 type Tile = {
     neighborhood: number,
     cardinality: number,
@@ -60,13 +66,12 @@ const CardinalityMap: Record<number, number> = {
 export class GameGrid {
     private _obstacles: Phaser.Tilemaps.TilemapLayer;
     private _walls: Phaser.Tilemaps.TilemapLayer;
+    private _structures: Phaser.Tilemaps.TilemapLayer
 
     constructor(
-        private _scene: Scene,
-        private _engine: Engine,
         private _tilemap: Phaser.Tilemaps.Tilemap
     ) {
-        const obstacles = this._tilemap.getLayer("Obstacles")?.tilemapLayer;
+        const obstacles = this._tilemap.getLayer("Obstacle")?.tilemapLayer;
         if(obstacles === undefined) {
             throw new Error('Failed to load obstacles!');
         }
@@ -81,19 +86,78 @@ export class GameGrid {
             throw new Error("Failed to load walls layer!");
         }
         this._walls = walls;
+
+        const structuresTileset = this._tilemap.addTilesetImage("structures");
+        if (structuresTileset === null) {
+            throw new Error("Failed to load structures tileset");
+        }
+        const structures = this._tilemap.createBlankLayer("GameGrid_structures", structuresTileset);
+        if (structures === null) {
+            throw new Error("Failed to load structures tileset");
+        }
+        this._structures = structures;
     }
 
-    tryPutWall(x: number, y: number, team: number): boolean {
-        if(
-            this._obstacles.hasTileAt(x, y) ||
-            this._walls.hasTileAt(x, y)
-        ) {
-            return false;
+    private canBuild(x: number, y: number): boolean {
+        return !(
+            x >= this._tilemap.width || x < 0 ||
+            y > this._tilemap.height || y < 0 ||
+            this._structures.hasTileAt(x, y) ||
+            this._walls.hasTileAt(x, y) ||
+            this._obstacles.hasTileAt(x, y)
+        );
+    }
+
+    tryPlaceStructure(type: number, x: number, y: number, team: number): [true, Phaser.Tilemaps.Tile] | [false, undefined] {
+        if (!this.canBuild(x, y)) {
+            return [false, undefined];
+        }
+        switch (type) {
+            case Structures.CoinGenerator:
+            case Structures.Tower:
+                const tile = this._structures.putTileAt(type, x, y);
+                tile.properties = { team };
+                return [true, tile];
+            case Structures.Wall:
+                return [true, this.putWall(x, y, team)];
+        }
+        return [false, undefined];
+    }
+
+    public tryRemoveStructure(x: number, y: number, team?: number) : [false, undefined] | [true, Phaser.Tilemaps.Tile] {
+        if (this.canBuild(x, y)) {
+            return [false, undefined];
         }
 
-        this._walls.putTileAt(0, x, y);
+        const structure = this._structures.getTileAt(x, y);
+        if (structure !== null) {
+            if (team !== undefined && structure.properties?.team !== team) {
+                return [false, undefined];
+            }
+            this._structures.removeTileAt(x, y);
+            return [true, structure];
+        }
+
+        const wall = this._walls.getTileAt(x, y);
+        if (wall !== null) {
+            if (team !== undefined && wall.properties?.team !== team) {
+                return [false, undefined];
+            }
+            this._walls.removeTileAt(x, y);
+            this._redrawTile(this._walls, x, y);
+            return [true, wall];
+        }
+        return [false, undefined];
+    }
+
+    private putWall(x: number, y: number, team: number): Phaser.Tilemaps.Tile {
+        const tile = this._walls.putTileAt(0, x, y);
+        tile.properties = {
+            ...tile.properties,
+            team
+        }
         this._redrawTile(this._walls, x, y);
-        return true;
+        return this._walls.getTileAt(x, y);
     }
 
     private _redrawTile(layer: Phaser.Tilemaps.TilemapLayer, x: number, y: number) {
@@ -107,7 +171,8 @@ export class GameGrid {
         const tile = layer.getTileAt(x, y);
         if(tile !== null) {
             const cardinality = tile.properties.cardinality;
-            layer.putTileAt(CardinalityMap[cardinality], x, y);
+            const newTile = layer.putTileAt(CardinalityMap[cardinality], x, y);
+            newTile.properties = tile.properties;
         }
     }
 

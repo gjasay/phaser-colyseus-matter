@@ -9,5 +9,8 @@ import { Schema, type, ArraySchema, MapSchema, SetSchema, DataChange } from '@co
 import { Entity } from './Entity'
 
 export class Tile extends Entity {
-    @type("string") public type!: string;
+    @type("number") public type!: number;
+    @type("number") public teamId!: number;
+    @type("number") public cost!: number;
+    @type("number") public hp!: number;
 }

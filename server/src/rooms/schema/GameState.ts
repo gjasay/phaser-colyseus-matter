@@ -1,7 +1,13 @@
 import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
-import { IInputMessage } from "../../../../types";
+// import { IInputMessage } from "../../../../types";
 import Matter from "matter-js";
 import gameConfig from "../../../../config/game.config";
+
+export const Structures = {
+  CoinGenerator: 0,
+  Tower: 1,
+  Wall: 2
+} as const;
 
 export class Entity extends Schema {
   @type("number") x: number = 0;
@@ -43,7 +49,7 @@ export class Circle extends Entity {
 
 export class Player extends Circle {
   inputQueue: IInputMessage[] = [];
-  teamId: number = 0;
+  @type("number") teamId: number = 0;
 
   constructor(
     x: number = 0,
@@ -63,26 +69,26 @@ export class Team extends Schema {
 }
 
 export class Tile extends Entity {
-  @type("string") type: string = ""; // "coingen", "tower"
+  @type("number") type: number;
   @type("number") teamId: number = 0;
   @type("number") cost: number;
   @type("number") hp: number;
 
-  constructor(type: string, teamId: number, x: number, y: number) {
+  constructor(type: number, teamId: number, x: number, y: number) {
     super(x, y);
     this.type = type;
     this.teamId = teamId;
 
     switch (type) {
-      case "coingen":
+      case Structures.CoinGenerator:
         this.cost = gameConfig.structures.coingen.cost;
         this.hp = gameConfig.structures.coingen.hp;
         break;
-      case "tower":
+      case Structures.Tower:
         this.cost = gameConfig.structures.tower.cost;
         this.hp = gameConfig.structures.tower.hp;
         break;
-      case "wall":
+      case Structures.Wall:
         this.cost = gameConfig.structures.wall.cost;
         this.hp = gameConfig.structures.wall.hp;
         break;

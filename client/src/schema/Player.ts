@@ -10,5 +10,5 @@ import { Circle } from './Circle'
 import { Entity } from './Entity'
 
 export class Player extends Circle {
-
+    @type("number") public teamId!: number;
 }

@@ -1,6 +1,7 @@
 import { Bodies, Body, Collision, Composite, Engine, Vector } from "matter-js";
 import playerConfig from "../../../config/player.config";
 import { Game } from "../scenes/Game";
+import { CreatePlayerBody } from "../util/physics/CreateBody";
 
 const LERP_FACTOR = 0.3;
 
@@ -23,6 +24,7 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   public physBody: Body;
   public serverPosition: Phaser.Math.Vector2;
   public viewPosition: Phaser.Math.Vector2;
+  public team: number;
 
   constructor(
     scene: Game | Phaser.Scene,
@@ -30,15 +32,15 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
     x: number,
     y: number,
     texture: string,
-    frame?: string | number,
+    team: number
   ) {
-    super(scene, x, y, texture, frame);
+    super(scene, x, y, texture, undefined);
     this._engine = engine;
     this.viewPosition = new Phaser.Math.Vector2(x, y);
     this.physBody = CreatePlayerBody(x, y);
+    this.team = team;
     Composite.add(this._engine.world, this.physBody);
 
-    // this.setCircle(playerConfig.radius, {
     scene.add.existing(this);
   }
 
@@ -73,17 +75,3 @@ export class PlayerPrefab extends Phaser.GameObjects.Sprite {
   }
 }
 
-export function CreatePlayerBody(x: number, y: number): Body {
-  return Bodies.circle(
-    x, y, playerConfig.radius, {
-      mass: playerConfig.mass,
-      friction: playerConfig.friction,
-      frictionAir: playerConfig.frictionAir,
-      inertia: Infinity,
-      collisionFilter: {
-        category: 0b0001,
-        mask: 0b1110
-      }
-    }
-  )
-}

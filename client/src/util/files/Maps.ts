@@ -22,8 +22,11 @@ export function LoadTilesetterMap(
   scene: Scene,
   mapKey: string,
   tilesetKey: string
-): Phaser.Tilemaps.Tilemap | null {
+): Phaser.Tilemaps.Tilemap {
   const mapData = scene.cache.json.get(mapKey) as ITilesetterData;
+  if (mapData === undefined) {
+    throw new Error("Map data not found!");
+  }
 
   const tilemap = scene.make.tilemap({
     tileWidth: mapData.tile_size,
@@ -35,20 +38,18 @@ export function LoadTilesetterMap(
   const tiles = tilemap.addTilesetImage(tilesetKey);
 
   if(!tiles){
-    console.error("Failed to load tileset" , tilesetKey);
-    return null;
+    throw new Error("Failed to load tileset " + tilesetKey);
   }
 
   for(const layer of mapData.layers) {
     const newLayer = tilemap.createBlankLayer(layer.name, tiles, 0, 0);
     if(newLayer === null) {
-      console.error("Failed to load mapd! Layer " + layer.name + " failed to create!");
-      return null;
+      throw new Error("Failed to load mapd! Layer " + layer.name + " failed to create!");
     }
     for(const position of layer.positions) {
       newLayer.putTileAt(position.id, position.x, position.y);
     }
   }
-  
+
   return tilemap;
 }

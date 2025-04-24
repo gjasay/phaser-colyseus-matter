@@ -9,5 +9,5 @@ import { Schema, type, ArraySchema, MapSchema, SetSchema, DataChange } from '@co
 import { Entity } from './Entity'
 
 export class Duck extends Entity {
-    @type("string") public state!: string;
+
 }

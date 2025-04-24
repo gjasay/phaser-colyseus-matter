@@ -59,7 +59,7 @@ export class MyRoom extends Room<State> {
 
       const i = toGrid(payload.x, payload.y, this._mapData.map_width);
       const tile = new Tile(payload.type, player.teamId, payload.x, payload.y);
-      this.state.tiles.push(tile);
+      this.state.tiles[i] = tile;
       console.log("added tile: ", payload.x, payload.y, i);
       tile.body = Bodies.rectangle(payload.x * 32 + 16, payload.y * 32 + 16, 32, 32, {
         isStatic: true,
@@ -76,7 +76,19 @@ export class MyRoom extends Room<State> {
 
     this.onMessage("remove", (client: Client, payload: IPlacementMessage) => {
       const i = toGrid(payload.x, payload.y, this._mapData.map_width);
-      
+      const player = this.state.players.get(client.sessionId);
+      const tile = this.state.tiles[i];
+      if (tile?.teamId === player.teamId) {
+        Composite.remove(this._engine.world, tile.body);
+        //delete this.state.tiles[i];
+        delete this.state.tiles[i];
+        console.log("Slice");
+        this.broadcast('removeTile', tile, {
+          afterNextPatch: false
+        });
+      } else {
+        console.log(tile.teamId);
+      }
     });
   }
 

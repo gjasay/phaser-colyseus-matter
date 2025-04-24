@@ -13,7 +13,7 @@ export interface ITileMessage {
 export interface IPlacementMessage {
   x: number;
   y: number;
-  type: string;
+  type: number;
 }
 
 interface ITilesetterPosition {
