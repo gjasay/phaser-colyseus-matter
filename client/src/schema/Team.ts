@@ -6,9 +6,9 @@
 // 
 
 import { Schema, type, ArraySchema, MapSchema, SetSchema, DataChange } from '@colyseus/schema';
-import { Circle } from './Circle'
-import { Entity } from './Entity'
 
-export class Player extends Circle {
-    @type("number") public teamId!: number;
+
+export class Team extends Schema {
+    @type("number") public id!: number;
+    @type("number") public coins!: number;
 }

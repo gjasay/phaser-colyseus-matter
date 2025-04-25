@@ -5,18 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "firefox",
-            "request": "launch",
-            "name": "Launch Firefox against localhost",
-            "url": "http://localhost:8080",
-            "webRoot": "${workspaceFolder}/client"
-        },
-        {
             "type": "bun",
+            "internalConsoleOptions": "neverOpen",
             "request": "launch",
+            "name": "Run File",
             "program": "dev",
-            "name": "Server",
-            "cwd": "${workspaceFolder}/server"
+            "cwd": "${workspaceFolder}",
+            "noDebug": false,
+            "watchMode": false
         }
     ]
 }

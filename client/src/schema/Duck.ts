@@ -5,9 +5,9 @@
 // GENERATED USING @colyseus/schema 3.0.33
 // 
 
-export interface IInputMessage {
-    left: boolean;
-    right: boolean;
-    up: boolean;
-    down: boolean;
+import { Schema, type, ArraySchema, MapSchema, SetSchema, DataChange } from '@colyseus/schema';
+import { Entity } from './Entity'
+
+export class Duck extends Entity {
+
 }

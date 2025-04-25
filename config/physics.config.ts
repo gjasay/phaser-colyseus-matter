@@ -1,4 +1,5 @@
 interface IPhysicsConfig {
+  fixedTimestep: number;
   gravity: {
     x: number;
     y: number;
@@ -13,6 +14,7 @@ interface IPhysicsConfig {
 }
 
 const physicsConfig: IPhysicsConfig = {
+  fixedTimestep: 1000 / 60,
   gravity: { x: 0, y: 0, scale: 0 },
   velocityIterations: 1,
   positionIterations: 1,
