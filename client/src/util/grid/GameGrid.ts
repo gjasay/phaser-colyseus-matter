@@ -4,7 +4,9 @@ import { Scene } from "phaser";
 export const Structures = {
     CoinGenerator: 0,
     Tower: 1,
-    Wall: 2
+    Barracks: 2,
+    Wall: 3,
+    Door: 4
 } as const;
 
 type Tile = {
@@ -66,11 +68,17 @@ const CardinalityMap: Record<number, number> = {
 export class GameGrid {
     private _obstacles: Phaser.Tilemaps.TilemapLayer;
     private _walls: Phaser.Tilemaps.TilemapLayer;
+    private _doors: Phaser.Tilemaps.TilemapLayer;
     private _structures: Phaser.Tilemaps.TilemapLayer
+
+    public width: number;
+    public height: number;
 
     constructor(
         private _tilemap: Phaser.Tilemaps.Tilemap
     ) {
+        this.width = this._tilemap.width * 32;
+        this.height = this._tilemap.height * 32;
         const obstacles = this._tilemap.getLayer("Obstacle")?.tilemapLayer;
         if(obstacles === undefined) {
             throw new Error('Failed to load obstacles!');
@@ -96,6 +104,16 @@ export class GameGrid {
             throw new Error("Failed to load structures tileset");
         }
         this._structures = structures;
+
+        const doorsTileset = this._tilemap.addTilesetImage('doors');
+        if(doorsTileset === null) {
+            throw new Error("Failed to load doors tileset");
+        }
+        const doors = this._tilemap.createBlankLayer("GameGrid_doors", doorsTileset);
+        if(doors === null) {
+            throw new Error("failed to load doors layer");
+        }
+        this._doors = doors;
     }
 
     private canBuild(x: number, y: number): boolean {
@@ -113,6 +131,7 @@ export class GameGrid {
             return [false, undefined];
         }
         switch (type) {
+            case Structures.Barracks:
             case Structures.CoinGenerator:
             case Structures.Tower:
                 const tile = this._structures.putTileAt(type, x, y);
@@ -120,6 +139,8 @@ export class GameGrid {
                 return [true, tile];
             case Structures.Wall:
                 return [true, this.putWall(x, y, team)];
+            case Structures.Door:
+                return [true, this.putDoor(x, y, team)];
         }
         return [false, undefined];
     }
@@ -155,6 +176,19 @@ export class GameGrid {
         tile.properties = {
             ...tile.properties,
             team
+        }
+        this._redrawTile(this._walls, x, y);
+        return this._walls.getTileAt(x, y);
+    }
+
+    private putDoor(x: number, y: number, team: number): Phaser.Tilemaps.Tile {
+        const top = this._walls.getTileAt(x, y - 1);
+        const bottom = this._walls.getTileAt(x, y + 1);
+        if(top || bottom) {
+            this._doors.putTileAt(0, x, y);
+        }
+        else {
+            this._doors.putTileAt(2, x, y);
         }
         this._redrawTile(this._walls, x, y);
         return this._walls.getTileAt(x, y);
@@ -202,16 +236,20 @@ export class GameGrid {
 
     private _calculateImmediateNeighborhood(layer: Phaser.Tilemaps.TilemapLayer, x: number, y: number) {
         let total = 0;
-        if(layer.hasTileAt(x, y - 1)) {
+        const solids = [
+            this._walls,
+            this._doors
+        ];
+        if(solids.some(layer => layer.hasTileAt(x, y - 1))) {
             total++;
         }
-        if(layer.hasTileAt(x - 1, y)) {
+        if(solids.some(layer => layer.hasTileAt(x - 1, y))) {
             total++;
         }
-        if(layer.hasTileAt(x + 1, y)) {
+        if(solids.some(layer =>layer.hasTileAt(x + 1, y))) {
             total++;
         }
-        if(layer.hasTileAt(x, y + 1)) {
+        if(solids.some(layer =>layer.hasTileAt(x, y + 1))) {
             total++;
         }
         return total;
@@ -220,35 +258,40 @@ export class GameGrid {
     private _calculateCardinality(layer: Phaser.Tilemaps.TilemapLayer, x: number, y: number) {
         let cardinality = 0;
 
-        if (layer.hasTileAt(x - 1, y - 1))
+        const solids = [
+            this._walls,
+            this._doors
+        ];
+
+        if (solids.some(layer => layer.hasTileAt(x - 1, y - 1)))
         {
             cardinality |= 1;
         }
-        if (layer.hasTileAt(x, y - 1))
+        if (solids.some(layer => layer.hasTileAt(x, y - 1)))
         {
             cardinality |= 2;
         }
-        if (layer.hasTileAt(x + 1, y - 1))
+        if (solids.some(layer => layer.hasTileAt(x + 1, y - 1)))
         {
             cardinality |= 4;
         }
-        if (layer.hasTileAt(x + 1, y))
+        if (solids.some(layer => layer.hasTileAt(x + 1, y)))
         {
             cardinality |= 8;
         }
-        if (layer.hasTileAt(x + 1, y + 1))
+        if (solids.some(layer => layer.hasTileAt(x + 1, y + 1)))
         {
             cardinality |= 16;
         }
-        if (layer.hasTileAt(x, y + 1))
+        if (solids.some(layer => layer.hasTileAt(x, y + 1)))
         {
             cardinality |= 32;
         }
-        if (layer.hasTileAt(x - 1, y + 1))
+        if (solids.some(layer => layer.hasTileAt(x - 1, y + 1)))
         {
             cardinality |= 64;
         }
-        if (layer.hasTileAt(x - 1, y))
+        if (solids.some(layer => layer.hasTileAt(x - 1, y)))
         {
             cardinality |= 128;
         }

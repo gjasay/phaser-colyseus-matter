@@ -10,11 +10,8 @@ import gameConfig from "../../../config/game.config";
 import physicsConfig from "../../../config/physics.config";
 import playerConfig from "../../../config/player.config";
 import { loadCollisionLayer } from "./util/LoadCollisionLayer";
-import * as fs from "fs";
 import * as path from "path";
 import { ReadFileAsync } from "./util/Files";
-
-const GRID_SIZE = 128;
 
 export class MyRoom extends Room<State> {
   maxClients = 4;

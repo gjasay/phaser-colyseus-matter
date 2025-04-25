@@ -49,7 +49,6 @@ export class Game extends Scene {
 
     this.cameras.main.setDeadzone(64, 64);
 
-
     this._engine.gravity = physicsConfig.gravity;
     this._engine.velocityIterations = physicsConfig.velocityIterations;
     this._engine.positionIterations = physicsConfig.positionIterations;
@@ -57,6 +56,7 @@ export class Game extends Scene {
     this.cameras.main.zoomTo(2);
 
     this._grid = new GameGrid(await LoadTilesetterMap(this, "mapData", "mainMap"));
+    this.cameras.main.setBounds(0, 0, this._grid.width, this._grid.height + 128);
 
     this._mapLoader = new TilesetterMapLoader(this);
     this._mapLoader.load("mainMap", "mapData");
@@ -72,7 +72,7 @@ export class Game extends Scene {
       }
     });
 
-    this.input.on("pointermove", (e: Phaser.Input.Pointer) => {
+    const tileDown = (e: Phaser.Input.Pointer) => {
       if (this._delKey?.isDown) {
         const [success, tile] = this._grid.tryRemoveStructure(
           Math.floor(e.worldX / 32),
@@ -112,7 +112,10 @@ export class Game extends Scene {
           });
         }
       }
-    });
+    };
+
+    this.input.on("pointermove", tileDown);
+    this.input.on("pointerdown", tileDown);
     nm.instance.initialize();
     await nm.instance.connectToRoom("find");
 
@@ -200,6 +203,7 @@ export class Game extends Scene {
         });
       }
     });
+
   }
 
   update(time: number, dt: number) {
@@ -218,11 +222,19 @@ export class Game extends Scene {
       return;
     }
     this._clientPlayer.fixedUpdate(dt);
-    if (this.inputHandler.payload.toggleMode) {
-      this._mode = this._mode === "build" ? "fight" : "build";
-      this.inputHandler.payload.toggleMode = false;
-    }
     Engine.update(this._engine, dt);
     this.inputHandler.sync();
+  }
+
+  setBuildMode() {
+    this._mode = "build";
+  }
+
+  setFightMode() {
+    this._mode = "fight";
+  }
+
+  setSelectedStructure(num: number) {
+    this._selectedStructure = num;
   }
 }

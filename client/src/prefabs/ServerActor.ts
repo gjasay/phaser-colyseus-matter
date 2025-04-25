@@ -17,6 +17,7 @@ export class ServerActor extends Phaser.GameObjects.Sprite {
     ) {
         super(scene, x, y, texture);
         this._engine = engine;
+        this.syncedPos = new Phaser.Math.Vector2(x, y);
         scene.add.existing(this);
     }
 

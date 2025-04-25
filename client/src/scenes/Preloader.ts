@@ -13,8 +13,17 @@ export class Preloader extends Phaser.Scene {
     this.load.image("wizard", "Ents/wizard.png");
     this.load.image("mainMap", "Maps/main_map/main_map.png");
 
-    this.load.spritesheet("structureSheet", "tiles/structures.png", { frameWidth: 32, frameHeight: 32, endFrame: 2 });
+    this.load.spritesheet("structureSheet", "tiles/structures.png", { frameWidth: 32, frameHeight: 32, endFrame: 3 });
+    this.load.spritesheet('doors', 'doors.png', { frameWidth: 32, frameHeight: 32, endFrame: 4});
     this.load.json("mapData", "Maps/main_map/main_map.json");
+
+    this.load.spritesheet('button', 'button.png', { frameWidth: 18, frameHeight: 18, endFrame: 2});
+    this.load.spritesheet('smallButton', 'small_button.png', { frameWidth: 9, frameHeight: 9, endFrame: 2 });
+    this.load.image('buildmode', 'buildmode.png');
+    this.load.image('commandmode', 'commandmode.png');
+    this.load.image('menu', 'menu.png');
+    this.load.image('wall', 'wall.png');
+    this.load.image('duckicon', 'duckicon.png');
   }
 
   create() {
