@@ -4,6 +4,12 @@ import Matter, { Bodies, Body, Bounds, Engine, Query, Vector, Vertices } from "m
 import gameConfig from "../../../../config/game.config";
 import { Navigate, VectorMap } from "../../util/Navigation";
 
+export const Structures = {
+  CoinGenerator: 0,
+  Tower: 1,
+  Wall: 2,
+}
+
 export class Entity extends Schema {
   @type("number") x: number = 0;
   @type("number") y: number = 0;
@@ -33,8 +39,33 @@ export class Rectangle extends Entity {
 }
 
 export class Tile extends Entity {
-  @type("string") type: string;
+  @type("number") type: number;
+  @type("number") teamId: number = 0;
+  @type("number") cost: number;
+  @type("number") hp: number;
+
+  constructor(type: number, teamId: number, x: number, y: number) {
+    super(x, y);
+    this.type = type;
+    this.teamId = teamId;
+
+    switch (type) {
+      case Structures.CoinGenerator:
+        this.cost = gameConfig.structures.coingen.cost;
+        this.hp = gameConfig.structures.coingen.hp;
+        break;
+      case Structures.Tower:
+        this.cost = gameConfig.structures.tower.cost;
+        this.hp = gameConfig.structures.tower.hp;
+        break;
+      case Structures.Wall:
+        this.cost = gameConfig.structures.wall.cost;
+        this.hp = gameConfig.structures.wall.hp;
+        break;
+    }
+  }
 }
+
 
 export interface IVectorLike {
   x: number,

@@ -1,6 +1,6 @@
 import * as Colyseus from "colyseus.js";
 import { Schema, SchemaCallbackProxy } from "@colyseus/schema";
-import { State } from "../schema/State";
+import { State } from "../../schema/State.ts";
 
 export class NetworkManager {
   public room: Colyseus.Room<State>;

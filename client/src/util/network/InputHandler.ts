@@ -1,4 +1,4 @@
-import { NetworkManager } from "./NetworkManager";
+import { NetworkManager } from "./NetworkManager.ts";
 import * as Phaser from "phaser";
 
 interface IInputPayload {

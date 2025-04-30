@@ -1,7 +1,7 @@
 import { PlayerPrefab } from "./Player";
 import { Game } from "../scenes/Game";
 import playerConfig from "../../../config/player.config";
-import { syncPosition } from "../util/sync/SyncPosition"
+import { syncPosition } from "../util/network/SyncPosition.ts"
 
 export class ClientPlayer extends PlayerPrefab {
   constructor(

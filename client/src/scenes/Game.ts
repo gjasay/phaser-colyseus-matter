@@ -1,6 +1,6 @@
 import { Input, Scene } from "phaser";
-import { NetworkManager, NetworkManager as nm } from "../util/NetworkManager";
-import { InputHandler } from "../util/InputHandler";
+import { NetworkManager, NetworkManager as nm } from "../util/network/NetworkManager.ts";
+import { InputHandler } from "../util/network/InputHandler.ts";
 import { Player } from "../schema/Player";
 import { CollectionCallback } from "@colyseus/schema";
 import { PlayerPrefab } from "../prefabs/Player";
