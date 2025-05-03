@@ -12,7 +12,7 @@ const config: Types.Core.GameConfig = {
   width: 1024,
   height: 768,
   parent: "game-container",
-  backgroundColor: "#028af8",
+  backgroundColor: "#000000",
   scale: {
     mode: Scale.FIT,
     autoCenter: Scale.CENTER_BOTH,
@@ -21,7 +21,7 @@ const config: Types.Core.GameConfig = {
   physics: {
     default: "matter",
     matter: {
-      debug: true,
+      debug: JSON.parse(import.meta.env.VITE_DEBUG || "false"),
       gravity: physicsConfig.gravity,
       velocityIterations: physicsConfig.velocityIterations,
       positionIterations: physicsConfig.positionIterations,

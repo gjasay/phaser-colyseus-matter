@@ -1,5 +1,5 @@
-import { Input, Scene } from "phaser";
-import { NetworkManager, NetworkManager as nm } from "../util/network/NetworkManager.ts";
+import { Scene } from "phaser";
+import { NetworkManager } from "../util/network/NetworkManager.ts";
 import { InputHandler } from "../util/network/InputHandler.ts";
 import { Player } from "../schema/Player";
 import { CollectionCallback } from "@colyseus/schema";
@@ -84,7 +84,7 @@ export class Game extends Scene {
           if (body !== undefined) {
             Composite.remove(this._engine.world, body);
           }
-          nm.instance.room.send("remove", { x: tile.x, y: tile.y });
+          NetworkManager.instance.room.send("remove", { x: tile.x, y: tile.y });
         }
       } else if (e.isDown && this._mode === "build") {
         const [success, tile] = this._grid.tryPlaceStructure(
@@ -105,7 +105,7 @@ export class Game extends Scene {
             })
           }
           Composite.add(this._engine.world, tile.properties.body);
-          nm.instance.room.send("place", {
+          NetworkManager.instance.room.send("place", {
             x: Math.floor(e.worldX / 32),
             y: Math.floor(e.worldY / 32),
             type: this._selectedStructure,
@@ -116,8 +116,6 @@ export class Game extends Scene {
 
     this.input.on("pointermove", tileDown);
     this.input.on("pointerdown", tileDown);
-    nm.instance.initialize();
-    await nm.instance.connectToRoom("find");
 
     this.inputHandler = new InputHandler(this, {
       left: ["A", Phaser.Input.Keyboard.KeyCodes.LEFT],
@@ -128,12 +126,12 @@ export class Game extends Scene {
     });
     this.inputHandler.startListening();
 
-    const players = nm.instance.state.players as CollectionCallback<
+    const players = NetworkManager.instance.state.players as CollectionCallback<
       string,
       Player
     >;
 
-    const tiles = nm.instance.state.tiles as CollectionCallback<number, Tile>;
+    const tiles = NetworkManager.instance.state.tiles as CollectionCallback<number, Tile>;
     tiles.onAdd((tile) => {
       const [added, newTile] = this._grid.tryPlaceStructure(
         tile.type,
@@ -162,7 +160,7 @@ export class Game extends Scene {
 
     players.onAdd((player: Player, sessionId: string) => {
       console.log("Player added:", player);
-      if (sessionId === nm.instance.room.sessionId) {
+      if (sessionId === NetworkManager.instance.room.sessionId) {
         this._clientPlayer = new PlayerPrefab(
           this,
           this._engine,
@@ -172,9 +170,9 @@ export class Game extends Scene {
           player.teamId
         );
         this.cameras.main.startFollow(this._clientPlayer);
-        nm.instance.schema(player).bindTo(this._clientPlayer.serverState);
-        nm.instance.schema(player).bindTo(this._clientPlayer.serverRef);
-        nm.instance.schema(player).onChange(() => {
+        NetworkManager.instance.schema(player).bindTo(this._clientPlayer.serverState);
+        NetworkManager.instance.schema(player).bindTo(this._clientPlayer.serverRef);
+        NetworkManager.instance.schema(player).onChange(() => {
           const { x: nx, y: ny } = player;
           const { x: ox, y: oy } = this._clientPlayer;
           const dx = nx - ox;
@@ -196,7 +194,7 @@ export class Game extends Scene {
         this._syncedActors.push(
           new ServerActor(this, this._engine, player.x, player.y, "wizard"),
         );
-        nm.instance.schema(player).onChange(() => {
+        NetworkManager.instance.schema(player).onChange(() => {
           const syncedPlayer =
             this._syncedActors[this._syncedActors.length - 1];
           syncedPlayer.syncedPos = new Phaser.Math.Vector2(player.x, player.y);
