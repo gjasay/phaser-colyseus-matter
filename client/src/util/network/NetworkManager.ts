@@ -8,7 +8,7 @@ export class NetworkManager {
   private _stateCallbacks: SchemaCallbackProxy<State>;
   private static _instance: NetworkManager;
 
-  private constructor() { }
+  private constructor() {}
 
   static get instance() {
     if (this._instance == null) {
@@ -24,8 +24,8 @@ export class NetworkManager {
 
   public async connectToRoom(
     action: "host" | "join" | "find",
-    roomId?: string,
-  ): Promise<Colyseus.Room<State> | unknown> {
+    roomId?: string
+  ): Promise<Colyseus.Room<State>> {
     try {
       switch (action) {
         case "host":
@@ -43,7 +43,7 @@ export class NetworkManager {
       }
       this._stateCallbacks = Colyseus.getStateCallbacks(this.room);
       return this.room;
-    } catch (e) {
+    } catch (e: any) {
       return e;
     }
   }
